@@ -10,4 +10,5 @@ public interface PathsToTheData {
     String SIMPLETEST_INTERSECTIONS = "data/intersections/simpletest.intersections";
 
     String ROUTES_UA = "data/airports/routesUA.dat";
+    String MOD_1_GRADER = "data/graders/mod1/graph";
 }

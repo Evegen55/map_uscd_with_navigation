@@ -1,6 +1,8 @@
 package basicgraph;
 
+import org.junit.Test;
 import util.GraphLoader;
+import util.PathsToTheData;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,10 +21,16 @@ public class DegreeGrader {
 
     private static final int TESTS = 12;
 
+    @Test
+    public void test_main() {
+        DegreeGrader grader = new DegreeGrader();
+        grader.run();
+    }
+
     /**
      * Turn a list into a readable and printable string
      */
-    public static String printList(List<Integer> lst) {
+    private static String printList(List<Integer> lst) {
         String res = "";
         for (int i : lst) {
             res += i + " ";
@@ -37,7 +45,7 @@ public class DegreeGrader {
     /**
      * Format readable feedback
      */
-    public static String printOutput(double score, String feedback) {
+    private static String printOutput(double score, String feedback) {
         return "Score: " + score + "\n Feedback: " + feedback;
     }
 
@@ -48,37 +56,31 @@ public class DegreeGrader {
         return "\n** Test #" + num + ": " + test + "...";
     }
 
-    public static void main(String[] args) {
-        DegreeGrader grader = new DegreeGrader();
-        grader.run();
-    }
 
     /**
      * Run a test case on an adjacency list and adjacency matrix.
      *
-     * @param i     The graph number
-     * @param desc  A description of the graph
-     * @param start The node to start from
-     * @param corr  A list containing the correct answer
+     * @param i    The graph number
+     * @param desc A description of the graph
      */
-    public void runTest(int i, String desc) {
-        GraphAdjList lst = new GraphAdjList();
-        GraphAdjMatrix mat = new GraphAdjMatrix();
+    private void runTest(final int i, final String desc) {
+        final GraphAdjList graphAdjList = new GraphAdjList();
+        final GraphAdjMatrix matrix = new GraphAdjMatrix();
 
-        String file = "data/graders/mod1/graph" + i + ".txt";
-        List<Integer> corr = readCorrect(file + ".degrees");
+        final String file = PathsToTheData.MOD_1_GRADER + i + ".txt";
+        final List<Integer> corr = readCorrect(file + ".degrees");
 
         feedback += "\n\nGRAPH: " + desc;
         feedback += appendFeedback(i * 2 - 1, "Testing adjacency list");
 
         // Load the graph, get the user's output, and compare with right answer
-        GraphLoader.loadGraph(file, lst);
-        List<Integer> result = lst.degreeSequence();
+        GraphLoader.loadGraph(file, graphAdjList);
+        List<Integer> result = graphAdjList.degreeSequence();
         judge(result, corr);
 
         feedback += appendFeedback(i * 2, "Testing adjacency matrix");
-        GraphLoader.loadGraph(file, mat);
-        result = mat.degreeSequence();
+        GraphLoader.loadGraph(file, matrix);
+        result = matrix.degreeSequence();
         judge(result, corr);
 
     }
@@ -86,14 +88,12 @@ public class DegreeGrader {
     /**
      * Run a road map/airplane route test case.
      *
-     * @param i     The graph number
-     * @param file  The file to read the correct answer from
-     * @param desc  A description of the graph
-     * @param start The node to start from
-     * @param corr  A list containing the correct answer
-     * @param type  The type of graph to use
+     * @param i    The graph number
+     * @param file The file to read the correct answer from
+     * @param desc A description of the graph
+     * @param type The type of graph to use
      */
-    public void runSpecialTest(int i, String file, String desc, String type) {
+    private void runSpecialTest(int i, String file, String desc, String type) {
         GraphAdjList lst = new GraphAdjList();
         GraphAdjMatrix mat = new GraphAdjMatrix();
 
@@ -144,7 +144,7 @@ public class DegreeGrader {
      * @param file The file to read from
      * @return A list containing the correct answer
      */
-    public List<Integer> readCorrect(String file) {
+    private List<Integer> readCorrect(String file) {
         List<Integer> ret = new ArrayList<Integer>();
         try {
             Scanner s = new Scanner(new File(file));
@@ -160,7 +160,7 @@ public class DegreeGrader {
     /**
      * Run the grader.
      */
-    public void run() {
+    private void run() {
         feedback = "";
 
         correct = 0;
