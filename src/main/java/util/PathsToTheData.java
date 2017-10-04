@@ -11,4 +11,6 @@ public interface PathsToTheData {
 
     String ROUTES_UA = "data/airports/routesUA.dat";
     String MOD_1_GRADER = "data/graders/mod1/graph";
+
+    String HTML_ROUTING_CSS = "html/routing.css";
 }

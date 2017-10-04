@@ -43,13 +43,18 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.PathsToTheData;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
+
 
 public class MapApp extends Application
         implements MapComponentInitializedListener {
+
+    private final static Logger LOGGER = Logger.getLogger(MapApp.class.getName());
 
     protected GoogleMapView mapComponent;
     protected GoogleMap map;
@@ -68,7 +73,7 @@ public class MapApp extends Application
      * Application entry point
      */
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(final Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
         // MAIN CONTAINER
@@ -76,103 +81,96 @@ public class MapApp extends Application
 
         // set up map
         mapComponent = new GoogleMapView();
-        System.out.println("---------------------------------------");
         mapComponent.addMapInitializedListener(this);
 
         // initialize tabs for data fetching and route controls
-        Tab routeTab = new Tab("Routing");
+        final Tab routeTab = new Tab("Routing");
 
         // create components for fetch tab
         final Button fetchButton = new Button("Fetch Data");
         final Button displayButton = new Button("Show Intersections");
         final TextField tf = new TextField();
-        final ComboBox<DataSet> cb = new ComboBox<DataSet>();
+        final ComboBox<DataSet> cb = new ComboBox<>();
 
         // set on mouse pressed, this fixes Windows 10 / Surface bug
-        cb.setOnMousePressed(e -> {
-            cb.requestFocus();
-        });
+        cb.setOnMousePressed(e -> cb.requestFocus());
 
-        HBox fetchControls = getBottomBox(tf, fetchButton);
-
-        VBox fetchBox = getFetchBox(displayButton, cb);
+        final HBox fetchControls = getBottomBox(tf, fetchButton);
+        final VBox fetchBox = getFetchBox(displayButton, cb);
 
 
-        // create components for fetch tab
-        Button routeButton = new Button("Show Route");
-        Button hideRouteButton = new Button("Hide Route");
-        Button resetButton = new Button("Reset");
-        Button visualizationButton = new Button("Start Visualization");
-        Image sImage = new Image(MarkerManager.startURL);
-        Image dImage = new Image(MarkerManager.destinationURL);
-        CLabel<geography.GeographicPoint> startLabel = new CLabel<geography.GeographicPoint>("Empty.", new ImageView(sImage), null);
-        CLabel<geography.GeographicPoint> endLabel = new CLabel<geography.GeographicPoint>("Empty.", new ImageView(dImage), null);
+        LOGGER.info("create components for fetch tab");
+        final Button routeButton = new Button("Show Route");
+        final Button hideRouteButton = new Button("Hide Route");
+        final Button resetButton = new Button("Reset");
+        final Button visualizationButton = new Button("Start Visualization");
+        final Image sImage = new Image(MarkerManager.startURL);
+        final Image dImage = new Image(MarkerManager.destinationURL);
+        LOGGER.info("create empty start and end points");
+        final CLabel<geography.GeographicPoint> startLabel = new CLabel<>("Empty.", new ImageView(sImage), null);
+        final CLabel<geography.GeographicPoint> endLabel = new CLabel<>("Empty.", new ImageView(dImage), null);
         //TODO -- hot fix
         startLabel.setMinWidth(180);
         endLabel.setMinWidth(180);
 //        startLabel.setWrapText(true);
 //        endLabel.setWrapText(true);
-        Button startButton = new Button("Start");
-        Button destinationButton = new Button("Dest");
+        final Button startButton = new Button("Start");
+        final Button destinationButton = new Button("Dest");
 
-        // Radio buttons for selecting search algorithm
+        LOGGER.info("create radio buttons for selecting search algorithm");
         final ToggleGroup group = new ToggleGroup();
+        final List<RadioButton> searchOptions = setupToggle(group);
 
-        List<RadioButton> searchOptions = setupToggle(group);
 
-
-        // Select and marker managers for route choosing and marker display/visuals
-        // should only be one instance (singleton)
-        SelectManager manager = new SelectManager();
-        MarkerManager markerManager = new MarkerManager();
+        LOGGER.info(" Select and marker managers for route choosing and marker display/visuals \n" +
+                "should only be one instance (singleton)");
+        final SelectManager manager = new SelectManager();
+        final MarkerManager markerManager = new MarkerManager();
         markerManager.setSelectManager(manager);
         manager.setMarkerManager(markerManager);
         markerManager.setVisButton(visualizationButton);
 
-        // create components for route tab
-        CLabel<geography.GeographicPoint> pointLabel = new CLabel<geography.GeographicPoint>("No point Selected.", null);
+        LOGGER.info(" create components for route tab");
+        final CLabel<geography.GeographicPoint> pointLabel = new CLabel<>("No point Selected.", null);
         manager.setPointLabel(pointLabel);
         manager.setStartLabel(startLabel);
         manager.setDestinationLabel(endLabel);
         setupRouteTab(routeTab, fetchBox, startLabel, endLabel, pointLabel, routeButton, hideRouteButton,
                 resetButton, visualizationButton, startButton, destinationButton, searchOptions);
 
-        // add tabs to pane, give no option to close
-        TabPane tp = new TabPane(routeTab);
+        LOGGER.info("add tabs to pane, give no option to close");
+        final TabPane tp = new TabPane(routeTab);
         tp.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        // initialize Services and controllers after map is loaded
+        LOGGER.info("Initialize Services and controllers after map is loaded");
         mapComponent.addMapReadyListener(() -> {
-            GeneralService gs = new GeneralService(mapComponent, manager, markerManager);
-            RouteService rs = new RouteService(mapComponent, markerManager);
-            //System.out.println("in map ready : " + this.getClass());
-            // initialize controllers
+            final GeneralService gs = new GeneralService(mapComponent, manager, markerManager);
+            final RouteService rs = new RouteService(mapComponent, markerManager);
+            LOGGER.info("in map ready : " + this.getClass());
+            LOGGER.info("initialize controllers");
             new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
                     startLabel, endLabel, pointLabel, manager, markerManager);
             new FetchController(gs, rs, tf, fetchButton, cb, displayButton);
         });
 
-        // add components to border pane
+        LOGGER.info("Add components to border pane");
         bp.setRight(tp);
         bp.setBottom(fetchControls);
         bp.setCenter(mapComponent);
 
-        Scene scene = new Scene(bp);
-        scene.getStylesheets().add("html/routing.css");
+        final Scene scene = new Scene(bp);
+        scene.getStylesheets().add(PathsToTheData.HTML_ROUTING_CSS);
         primaryStage.setScene(scene);
         primaryStage.show();
-
     }
 
 
     @Override
     public void mapInitialized() {
-
-        LatLong center = new LatLong(32.8810, -117.2380);
-
-
+        LOGGER.info("Map initializing");
+        final LatLong center = new LatLong(32.8810, -117.2380);
         // set map options
-        MapOptions options = new MapOptions();
+        final MapOptions options = new MapOptions();
         options.center(center)
                 .mapMarker(false)
                 .mapType(MapTypeIdEnum.ROADMAP)
@@ -185,19 +183,15 @@ public class MapApp extends Application
                 .streetViewControl(false)
                 .zoom(14)
                 .zoomControl(true);
-
         // create map;
         map = mapComponent.createMap(options);
         setupJSAlerts(mapComponent.getWebView());
-
-
     }
 
 
     // SETTING UP THE VIEW
-
-    private HBox getBottomBox(TextField tf, Button fetchButton) {
-        HBox box = new HBox();
+    private HBox getBottomBox(final TextField tf, final Button fetchButton) {
+        final HBox box = new HBox();
         tf.setPrefWidth(FETCH_COMPONENT_WIDTH);
         box.getChildren().add(tf);
         fetchButton.setPrefWidth(FETCH_COMPONENT_WIDTH);
@@ -207,17 +201,17 @@ public class MapApp extends Application
 
     /**
      * Setup layout and controls for Fetch tab
+     *
      * @param displayButton
      * @param cb
      * @return
      */
-    private VBox getFetchBox(Button displayButton, ComboBox<DataSet> cb) {
+    private VBox getFetchBox(final Button displayButton, final ComboBox<DataSet> cb) {
         // add button to tab, rethink design and add V/HBox for content
-        VBox v = new VBox();
-        HBox h = new HBox();
+        final VBox v = new VBox();
+        final HBox h = new HBox();
 
-
-        HBox intersectionControls = new HBox();
+        final HBox intersectionControls = new HBox();
 //        cb.setMinWidth(displayButton.getWidth());
         cb.setPrefWidth(FETCH_COMPONENT_WIDTH);
         intersectionControls.getChildren().add(cb);
@@ -248,45 +242,40 @@ public class MapApp extends Application
      * @param destButton
      * @param searchOptions
      */
-    private void setupRouteTab(Tab routeTab, VBox fetchBox, Label startLabel, Label endLabel, Label pointLabel,
-                               Button showButton, Button hideButton, Button resetButton, Button vButton, Button startButton,
-                               Button destButton, List<RadioButton> searchOptions) {
+    private void setupRouteTab(final Tab routeTab, final VBox fetchBox, final Label startLabel, final Label endLabel, final Label pointLabel,
+                               final Button showButton, final Button hideButton, final Button resetButton, final Button vButton,
+                               final Button startButton,
+                               final Button destButton, final List<RadioButton> searchOptions) {
 
         //set up tab layout
-        HBox h = new HBox();
+        final HBox h = new HBox();
         // v is inner container
-        VBox v = new VBox();
+        final VBox v = new VBox();
         h.getChildren().add(v);
 
-
-        VBox selectLeft = new VBox();
-
-
+        final VBox selectLeft = new VBox();
         selectLeft.getChildren().add(startLabel);
-        HBox startBox = new HBox();
+
+        final HBox startBox = new HBox();
         startBox.getChildren().add(startLabel);
         startBox.getChildren().add(startButton);
         startBox.setSpacing(20);
 
-        HBox destinationBox = new HBox();
+        final HBox destinationBox = new HBox();
         destinationBox.getChildren().add(endLabel);
         destinationBox.getChildren().add(destButton);
         destinationBox.setSpacing(20);
 
-
-        VBox markerBox = new VBox();
-        Label markerLabel = new Label("Selected Marker : ");
-
-
+        final VBox markerBox = new VBox();
+        final Label markerLabel = new Label("Selected Marker : ");
         markerBox.getChildren().add(markerLabel);
-
         markerBox.getChildren().add(pointLabel);
 
         VBox.setMargin(markerLabel, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
         VBox.setMargin(pointLabel, new Insets(0, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
         VBox.setMargin(fetchBox, new Insets(0, 0, MARGIN_VAL * 2, 0));
 
-        HBox showHideBox = new HBox();
+        final HBox showHideBox = new HBox();
         showHideBox.getChildren().add(showButton);
         showHideBox.getChildren().add(hideButton);
         showHideBox.setSpacing(2 * MARGIN_VAL);
@@ -305,36 +294,30 @@ public class MapApp extends Application
         VBox.setMargin(vButton, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
         vButton.setDisable(true);
         v.getChildren().add(markerBox);
-        //v.getChildren().add(resetButton);
-
-
+//        v.getChildren().add(resetButton);
         routeTab.setContent(h);
-
-
     }
 
-    private void setupJSAlerts(WebView webView) {
+    private void setupJSAlerts(final WebView webView) {
         webView.getEngine().setOnAlert(e -> {
-            Stage popup = new Stage();
+            final Stage popup = new Stage();
             popup.initOwner(primaryStage);
             popup.initStyle(StageStyle.UTILITY);
             popup.initModality(Modality.WINDOW_MODAL);
-
-            StackPane content = new StackPane();
+            final StackPane content = new StackPane();
             content.getChildren().setAll(
                     new Label(e.getData())
             );
             content.setPrefSize(200, 100);
-
             popup.setScene(new Scene(content));
             popup.showAndWait();
         });
     }
 
-    private LinkedList<RadioButton> setupToggle(ToggleGroup group) {
+    private LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
 
         // Use Dijkstra as default
-        RadioButton rbD = new RadioButton("Dijkstra");
+        final RadioButton rbD = new RadioButton("Dijkstra");
         rbD.setUserData("Dijkstra");
         rbD.setSelected(true);
 
@@ -348,14 +331,13 @@ public class MapApp extends Application
         RadioButton rbBD = new RadioButton("Dijkstra by the time");
         rbBD.setUserData("D_time");
 
-
         rbB.setToggleGroup(group);
         rbD.setToggleGroup(group);
         rbA.setToggleGroup(group);
         //my code
         rbBD.setToggleGroup(group);
 
-        return new LinkedList<RadioButton>(Arrays.asList(rbB, rbD, rbA, rbBD));
+        return new LinkedList<>(Arrays.asList(rbB, rbD, rbA, rbBD));
     }
 
 
