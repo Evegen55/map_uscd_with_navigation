@@ -23,160 +23,164 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * @author UCSD MOOC development team and
  * @author Johnn
  * A class which represents a graph of geographic locations
  * Nodes in the graph are intersections between
- *
  */
 public class MapGraph {
-    //TODO: Add your member variables here in WEEK 2
+
+    private final static Logger LOGGER = Logger.getLogger(MapGraph.class.getName());
+
+    //member variables here in WEEK 2
     private int numVertices;
 
-    //DO IT LIKE PRIVATE !
-    public HashMap<GeographicPoint, MapNode> listNodes;
+    private HashMap<GeographicPoint, MapNode> listNodes;
 
     /**
      * Create a new empty MapGraph
      */
     public MapGraph() {
-        // TODO: Implement in this constructor in WEEK 2
+        //Implemented this constructor in WEEK 2
         listNodes = new HashMap<>();
         numVertices = 0;
     }
 
-
-    //*************************************************************************************************
-    //list of helper methods
-
     /**
      * Get the number of vertices (road intersections) in the graph
+     *
      * @return The number of vertices in the graph.
      */
     public int getNumVertices() {
-        //TODO: Implement this method in WEEK 2
+        //Implemented this method in WEEK 2
         numVertices = listNodes.size();
         return numVertices;
     }
 
     /**
      * Return the intersections, which are the vertices in this graph.
+     *
      * @return The vertices in this graph as GeographicPoints
      */
     public Set<GeographicPoint> getVertices() {
-        //TODO: Implement this method in WEEK 2
+        //implemented this method in WEEK 2
         Set<GeographicPoint> str = listNodes.keySet();
         return str;
     }
 
     /**
      * Get the number of road segments in the graph
+     *
      * @return The number of edges in the graph.
      */
     public int getNumEdges() {
-        //TODO: Implement this method in WEEK 2
+        return listNodes.entrySet().stream().mapToInt(entry -> entry.getValue().getListEdges().size()).sum();
+    }
+
+    @Deprecated
+    int getNumEdgesAsJava7() {
+        //Implemented this method in WEEK 2
         int numEdges = 0;
         for (Entry<GeographicPoint, MapNode> entry : listNodes.entrySet()) {
             numEdges += entry.getValue().getListEdges().size();
         }
-
         return numEdges;
     }
 
-    /** Add a node corresponding to an intersection at a Geographic Point
+    /**
+     * Add a node corresponding to an intersection at a Geographic Point
      * If the location is already in the graph or null, this method does
      * not change the graph.
-     * @param location  The location of the intersection
+     *
+     * @param location The location of the intersection
      * @return true if a node was added, false if it was not (the node
      * was already in the graph, or the parameter is null).
      */
-    public boolean addVertex(GeographicPoint location) {
-        // TODO: Implement this method in WEEK 2
+    public boolean addVertex(final GeographicPoint location) {
+        //Implemented this method in WEEK 2
         //add a distance for week 3 - set a distance to infinity
-        //System.out.println("adding" + "\t" + location.toString());
-
+        LOGGER.info("adding" + "\t" + location.toString());
         if (!listNodes.containsKey(location)) {
-            MapNode addedMaNode = new MapNode(location, "");                                                                 //System.out.println("added" + "\t" + location.toString());
-            listNodes.put(location, addedMaNode);
+            MapNode mapNode = new MapNode(location, "");
+            listNodes.put(location, mapNode);
             return true;
         }
         return false;
     }
 
     /**
-     * Adds a directed edge to the graph from pt1 to pt2.
+     * Adds a DIRECTED edge to the graph from pt1 to pt2 with speed limitation depends on the road type
      * Precondition: Both GeographicPoints have already been added to the graph
-     * @param from The starting point of the edge
-     * @param to The ending point of the edge
+     * <p>
+     * set a speed limit on the road that depending od a type of a street
+     * motorway_link  with no limitations (we could use 500 km/h)
+     * (A) road, specially designed and built for motor traffic,
+     * which does not serve properties bordering on it, and which:
+     * is provided, except at special points or temporarily,
+     * with separate carriage ways for the two directions of traffic,
+     * separated from each other, either by a dividing strip not intended for traffic,
+     * or exceptionally by other means;
+     * does not cross at level with any road, railway or tramway track, or footpath;
+     * is specially sign posted as a motorway and is reserved for specific categories of road motor vehicles.
+     * 'Entry and exit lanes of motorways are included irrespectively
+     * of the location of the signposts. Urban motorways are also included.'
+     *
+     * @param from     The starting point of the edge
+     * @param to       The ending point of the edge
      * @param roadName The name of the road
      * @param roadType The type of the road
-     * @param length The length of the road, in km
+     * @param length   The length of the road, in km
      * @throws IllegalArgumentException If the points have not already been
-     *   added as nodes to the graph, if any of the arguments is null,
-     *   or if the length is less than 0.
+     *                                  added as nodes to the graph, if any of the arguments is null,
+     *                                  or if the length is less than 0.
+     * @see https://www.wikiwand.com/en/Controlled-access_highway
+     * residential (max speed limit in most cases 60 km/h)
+     * Residential throughways such as 19th Avenue, Guerrero, California, Oak and Fell Streets
+     * have high levels of fast-moving traffic with residential land uses.
+     * As such, they are often not designed to serve residential uses, and can be unpleasant to walk or live along.
+     * Streetscape improvements should focus on buffering the sidewalk and adjacent homes from vehicles
+     * passing in the street and providing a generous, useable public realm through landscaping, curb extensions,
+     * or widened sidewalks where roadway space allows.
+     * @see http://www.sfbetterstreets.org/design-guidelines/street-types/residential-throughways/
+     * living_street (max speed limit on the world 20 km/h)
+     * A living street is a street designed primarily with the interests of pedestrians
+     * and cyclists in mind and as a social space where people can meet and where
+     * children may also be able to play legally and safely.
+     * These roads are still available for use by motor vehicles, however their design aims
+     * to reduce both the speed and dominance of motorised transport.
+     * This is often achieved using the shared space approach, with greatly reduced demarcations
+     * between vehicle traffic and pedestrians. Vehicle parking may also be restricted to designated bays.
+     * It became popular during the 1970s in the Netherlands, which is why
+     * the Dutch word for a living street (woonerf) is often used as a synonym.
+     * Country-specific living street implementations include: home zone (United Kingdom),
+     * residential zone (ru:����� ����, Russia), shared zone (Australia/New Zealand),
+     * woonerf (Netherlands and Flanders) and zone residentielle (France).
+     * secondary
+     * a simple secondary highway. The maximum speed, in kilometers per hour which is allowed on the road, for example 120
+     * tertiary
+     * The highway=tertiary tag is used for roads connecting smaller settlements, and within large settlements for roads connecting local centres.
+     * In terms of the transportation network, OpenStreetMap "tertiary" roads commonly also connect minor streets to more major roads.
+     * (max speed limit in most cases 80 km/h)
+     * unclassified (max speed limit in most cases 80 km/h)
+     * The tag highway=unclassified is used for minor public roads typically at the lowest level of the interconnecting grid network.
+     * Unclassified roads have lower importance in the road network than tertiary roads, and are not residential streets or agricultural tracks.
+     * highway=unclassified should be used for roads used for local traffic and used to connect other towns, villages or hamlets.
+     * Unclassified roads are considered usable by motor cars.
+     * @see http://wiki.openstreetmap.org/wiki/Tag:highway%3Dunclassified
+     * @see https://www.wikiwand.com/en/Hierarchy_of_roads
+     * @see https://www.wikiwand.com/en/Street_hierarchy
      */
-    public void addEdge(GeographicPoint from, GeographicPoint to, String roadName,
-                        String roadType, double length) throws IllegalArgumentException {
-        //TODO: Implement this method in WEEK 2
+    public void addEdge(final GeographicPoint from, final GeographicPoint to, final String roadName,
+                        final String roadType, final double length) throws IllegalArgumentException {
+        //implemented this method in WEEK 2
         if (listNodes.containsKey(from) && listNodes.containsKey(to)) {
-            MapNode startNode = listNodes.get(from);
-            MapNode finishNode = listNodes.get(to);
-            MapEdge addedMapEdge = new MapEdge(startNode, finishNode, roadName, roadType, length);
+            final MapNode startNode = listNodes.get(from);
+            final MapNode finishNode = listNodes.get(to);
+            final MapEdge addedMapEdge = new MapEdge(startNode, finishNode, roadName, roadType, length);
 
-			/*
-            set a speed limit on the road that depending od a type of a street
-			motorway_link  with no limitations (we could use 500 km/h)
-			             (A) road, specially designed and built for motor traffic,
-			             which does not serve properties bordering on it, and which:
-			             is provided, except at special points or temporarily,
-			             with separate carriage ways for the two directions of traffic,
-			             separated from each other, either by a dividing strip not intended for traffic,
-			             or exceptionally by other means;
-			             does not cross at level with any road, railway or tramway track, or footpath;
-			             is specially sign posted as a motorway and is reserved for specific categories of road motor vehicles.
-			             'Entry and exit lanes of motorways are included irrespectively
-			             of the location of the signposts. Urban motorways are also included.'
-			             @see https://www.wikiwand.com/en/Controlled-access_highway
-			residential (max speed limit in most cases 60 km/h)
-			             Residential throughways such as 19th Avenue, Guerrero, California, Oak and Fell Streets
-			             have high levels of fast-moving traffic with residential land uses.
-			             As such, they are often not designed to serve residential uses, and can be unpleasant to walk or live along.
-			             Streetscape improvements should focus on buffering the sidewalk and adjacent homes from vehicles
-			             passing in the street and providing a generous, useable public realm through landscaping, curb extensions,
-			             or widened sidewalks where roadway space allows.
-			             @see http://www.sfbetterstreets.org/design-guidelines/street-types/residential-throughways/
-			living_street (max speed limit on the world 20 km/h)
-			             A living street is a street designed primarily with the interests of pedestrians
-			             and cyclists in mind and as a social space where people can meet and where
-			             children may also be able to play legally and safely.
-			             These roads are still available for use by motor vehicles, however their design aims
-			             to reduce both the speed and dominance of motorised transport.
-			             This is often achieved using the shared space approach, with greatly reduced demarcations
-			             between vehicle traffic and pedestrians. Vehicle parking may also be restricted to designated bays.
-			             It became popular during the 1970s in the Netherlands, which is why
-			             the Dutch word for a living street (woonerf) is often used as a synonym.
-
-			             Country-specific living street implementations include: home zone (United Kingdom),
-			             residential zone (ru:����� ����, Russia), shared zone (Australia/New Zealand),
-			             woonerf (Netherlands and Flanders) and zone residentielle (France).
-            secondary
-                         a simple secondary highway. The maximum speed, in kilometers per hour which is allowed on the road, for example 120
-			tertiary
-			             The highway=tertiary tag is used for roads connecting smaller settlements, and within large settlements for roads connecting local centres.
-			             In terms of the transportation network, OpenStreetMap "tertiary" roads commonly also connect minor streets to more major roads.
-			             (max speed limit in most cases 80 km/h)
-			unclassified (max speed limit in most cases 80 km/h)
-			             The tag highway=unclassified is used for minor public roads typically at the lowest level of the interconnecting grid network.
-			             Unclassified roads have lower importance in the road network than tertiary roads, and are not residential streets or agricultural tracks.
-			             highway=unclassified should be used for roads used for local traffic and used to connect other towns, villages or hamlets.
-			             Unclassified roads are considered usable by motor cars.
-			             @see http://wiki.openstreetmap.org/wiki/Tag:highway%3Dunclassified
-
-			@see https://www.wikiwand.com/en/Hierarchy_of_roads
-			@see https://www.wikiwand.com/en/Street_hierarchy
-			*/
             if ((roadType.compareTo("motorway") == 0) || (roadType.compareTo("motorway_link") == 0)) {
                 addedMapEdge.setSpeedLimit(500);
             } else if (roadType.compareTo("living_street") == 0) {
@@ -195,17 +199,13 @@ public class MapGraph {
                 addedMapEdge.setSpeedLimit(90);
             }
 
-            //add OUTCOMING edge from -> to
+            //add an OUTCOMING edge from -> to
             listNodes.get(from).getListEdges().add(addedMapEdge);
-
-            //test it
-            //System.out.println(addedMapEdge.toString());
-
+            LOGGER.info("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
         }
     }
 
     /**
-     *
      * @param forSearch
      * @return
      */
@@ -220,7 +220,6 @@ public class MapGraph {
     }
 
     /**
-     *
      * @param start
      * @param end
      * @return
@@ -238,13 +237,11 @@ public class MapGraph {
     }
 
     /**
-     *
      * @param parentMap
      * @param start
      * @param goal
      * @return
      * @author UCSD MOOC development team
-     *
      */
     private List<GeographicPoint> reconstructPath(HashMap<MapNode, MapNode> parentMap, MapNode start, MapNode goal) {
         LinkedList<GeographicPoint> path = new LinkedList<GeographicPoint>();
@@ -258,7 +255,6 @@ public class MapGraph {
     }
 
     /**
-     *
      * @param parentMap
      */
     private void printNodesMap(HashMap<MapNode, MapNode> parentMap) {
@@ -290,6 +286,7 @@ public class MapGraph {
 
     /**
      * a helper method for using it as distance priority
+     *
      * @return comparator
      */
     public Comparator<MapNode> createComparator() {
@@ -313,6 +310,7 @@ public class MapGraph {
 
     /**
      * a helper method for using it as distance priority
+     *
      * @return comparator
      */
     public Comparator<MapNode> createComparatorByTime() {
@@ -328,10 +326,11 @@ public class MapGraph {
 
     /**
      * a helper method for getting a reduced cost
-     * @see https://en.wikipedia.org/wiki/A*_search_algorithm
+     *
      * @param start
      * @param goal
      * @return
+     * @see https://en.wikipedia.org/wiki/A*_search_algorithm
      */
     private double getReducedCost(GeographicPoint start, GeographicPoint goal) {
         double red_cost = (Math.sqrt(Math.pow((start.x - goal.x), 2) + Math.pow((start.y - goal.y), 2)));
@@ -339,7 +338,6 @@ public class MapGraph {
     }
 
     /**
-     *
      * @param start
      * @param end
      * @return
@@ -356,12 +354,13 @@ public class MapGraph {
     //list of searching methods
 
 
-    /** Find the path from start to goal using breadth first search
+    /**
+     * Find the path from start to goal using breadth first search
      *
      * @param start The starting location
-     * @param goal The goal location
+     * @param goal  The goal location
      * @return The list of intersections that form the shortest (unweighted)
-     *   path from start to goal (including both start and goal).
+     * path from start to goal (including both start and goal).
      */
     public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
@@ -370,13 +369,14 @@ public class MapGraph {
         return bfs(start, goal, temp);
     }
 
-    /** Find the path from start to goal using breadth first search
+    /**
+     * Find the path from start to goal using breadth first search
      *
-     * @param start The starting location
-     * @param goal The goal location
+     * @param start        The starting location
+     * @param goal         The goal location
      * @param nodeSearched A hook for visualization.  See assignment instructions for how to use it.
      * @return The list of intersections that form the shortest (unweighted)
-     *   path from start to goal (including both start and goal).
+     * path from start to goal (including both start and goal).
      */
     public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 2
@@ -433,12 +433,13 @@ public class MapGraph {
     //part 1
     //===================================================================================================
 
-    /** Find the path from start to goal using Dijkstra's algorithm
+    /**
+     * Find the path from start to goal using Dijkstra's algorithm
      *
      * @param start The starting location
-     * @param goal The goal location
+     * @param goal  The goal location
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
@@ -448,13 +449,14 @@ public class MapGraph {
         return dijkstra(start, goal, temp);
     }
 
-    /** Find the path from start to goal using Dijkstra's algorithm
+    /**
+     * Find the path from start to goal using Dijkstra's algorithm
      *
-     * @param start The starting location
-     * @param goal The goal location
+     * @param start        The starting location
+     * @param goal         The goal location
      * @param nodeSearched A hook for visualization.  See assignment instructions for how to use it.
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 3
@@ -516,12 +518,13 @@ public class MapGraph {
     //part 2
     //===================================================================================================
 
-    /** Find the path from start to goal using A-Star search
+    /**
+     * Find the path from start to goal using A-Star search
      *
      * @param start The starting location
-     * @param goal The goal location
+     * @param goal  The goal location
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> aStarSearch(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
@@ -530,13 +533,14 @@ public class MapGraph {
         return aStarSearch(start, goal, temp);
     }
 
-    /** Find the path from start to goal using A-Star search
+    /**
+     * Find the path from start to goal using A-Star search
      *
-     * @param start The starting location
-     * @param goal The goal location
+     * @param start        The starting location
+     * @param goal         The goal location
      * @param nodeSearched A hook for visualization.  See assignment instructions for how to use it.
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> aStarSearch(GeographicPoint start,
                                              GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
@@ -606,12 +610,13 @@ public class MapGraph {
     //MY VARIANT
     //==============================================================================================================
 
-    /** Find the path from start to goal using Dijkstra's algorithm
+    /**
+     * Find the path from start to goal using Dijkstra's algorithm
      *
      * @param start The starting location
-     * @param goal The goal location
+     * @param goal  The goal location
      * @return The list of intersections that form the faster path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> dijkstraByTime(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
@@ -621,13 +626,14 @@ public class MapGraph {
         return dijkstraByTime(start, goal, temp);
     }
 
-    /** Find the path from start to goal using Dijkstra's algorithm
+    /**
+     * Find the path from start to goal using Dijkstra's algorithm
      *
-     * @param start The starting location
-     * @param goal The goal location
+     * @param start        The starting location
+     * @param goal         The goal location
      * @param nodeSearched A hook for visualization.  See assignment instructions for how to use it.
      * @return The list of intersections that form the faster path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> dijkstraByTime(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 3
@@ -691,12 +697,13 @@ public class MapGraph {
     }
 
 
-    /** Find the path from start to goal using A-Star search
+    /**
+     * Find the path from start to goal using A-Star search
      *
      * @param start The starting location
-     * @param goal The goal location
+     * @param goal  The goal location
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> aStarSearchByTime(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
@@ -705,13 +712,14 @@ public class MapGraph {
         return aStarSearchByTime(start, goal, temp);
     }
 
-    /** Find the path from start to goal using A-Star search
+    /**
+     * Find the path from start to goal using A-Star search
      *
-     * @param start The starting location
-     * @param goal The goal location
+     * @param start        The starting location
+     * @param goal         The goal location
      * @param nodeSearched A hook for visualization.  See assignment instructions for how to use it.
      * @return The list of intersections that form the shortest path from
-     *   start to goal (including both start and goal).
+     * start to goal (including both start and goal).
      */
     public List<GeographicPoint> aStarSearchByTime(GeographicPoint start,
                                                    GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
@@ -776,8 +784,8 @@ public class MapGraph {
 
 
     public static void main(String[] args) {
-		/*
-		System.out.print("Making a new map...");
+        /*
+        System.out.print("Making a new map...");
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
 		GraphLoader.loadRoadMap("data/testdata/simpletest.map", theMap);
@@ -796,7 +804,7 @@ public class MapGraph {
         //-----------------------------------------------------
         //basic map
         //Use this code in Week 3 End of Week Quiz
-		/*
+        /*
 
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
