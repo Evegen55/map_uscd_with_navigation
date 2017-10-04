@@ -136,7 +136,7 @@ public class MapGraph {
      * @throws IllegalArgumentException If the points have not already been
      *                                  added as nodes to the graph, if any of the arguments is null,
      *                                  or if the length is less than 0.
-     * @see https://www.wikiwand.com/en/Controlled-access_highway
+     * @see <a href = "https://www.wikiwand.com/en/Controlled-access_highway"> </a>
      * residential (max speed limit in most cases 60 km/h)
      * Residential throughways such as 19th Avenue, Guerrero, California, Oak and Fell Streets
      * have high levels of fast-moving traffic with residential land uses.
@@ -144,7 +144,7 @@ public class MapGraph {
      * Streetscape improvements should focus on buffering the sidewalk and adjacent homes from vehicles
      * passing in the street and providing a generous, useable public realm through landscaping, curb extensions,
      * or widened sidewalks where roadway space allows.
-     * @see http://www.sfbetterstreets.org/design-guidelines/street-types/residential-throughways/
+     * @see <a href = "http://www.sfbetterstreets.org/design-guidelines/street-types/residential-throughways/"> </a>
      * living_street (max speed limit on the world 20 km/h)
      * A living street is a street designed primarily with the interests of pedestrians
      * and cyclists in mind and as a social space where people can meet and where
@@ -169,9 +169,9 @@ public class MapGraph {
      * Unclassified roads have lower importance in the road network than tertiary roads, and are not residential streets or agricultural tracks.
      * highway=unclassified should be used for roads used for local traffic and used to connect other towns, villages or hamlets.
      * Unclassified roads are considered usable by motor cars.
-     * @see http://wiki.openstreetmap.org/wiki/Tag:highway%3Dunclassified
-     * @see https://www.wikiwand.com/en/Hierarchy_of_roads
-     * @see https://www.wikiwand.com/en/Street_hierarchy
+     * @see <a href = "http://wiki.openstreetmap.org/wiki/Tag:highway%3Dunclassified"> </a>
+     * @see <a href = "https://www.wikiwand.com/en/Hierarchy_of_roads"> </a>
+     * @see <a href = "https://www.wikiwand.com/en/Street_hierarchy"> </a>
      */
     public void addEdge(final GeographicPoint from, final GeographicPoint to, final String roadName,
                         final String roadType, final double length) throws IllegalArgumentException {
@@ -243,15 +243,25 @@ public class MapGraph {
      * @return
      * @author UCSD MOOC development team
      */
-    private List<GeographicPoint> reconstructPath(HashMap<MapNode, MapNode> parentMap, MapNode start, MapNode goal) {
-        LinkedList<GeographicPoint> path = new LinkedList<GeographicPoint>();
-        MapNode current = goal;
-        while (!current.equals(start)) {
-            path.addFirst(current.getNodeLocation());
-            current = parentMap.get(current);
+    private List<GeographicPoint> reconstructPath(final HashMap<MapNode, MapNode> parentMap, final MapNode start,
+                                                  final MapNode goal) {
+        final LinkedList<GeographicPoint> path = new LinkedList<>();
+        if (!checkForNulls(parentMap, start, goal)) {
+            MapNode current = goal;
+            while ((current != null) && (!current.equals(start))) {
+                path.addFirst(current.getNodeLocation());
+                current = parentMap.get(current);
+            }
+            path.addFirst(start.getNodeLocation());
+        } else {
+            // TODO: 10/4/2017 smth
         }
-        path.addFirst(start.getNodeLocation());
         return path;
+    }
+
+    private boolean checkForNulls(final HashMap<MapNode, MapNode> parentMap, final MapNode start, final MapNode goal) {
+//        LOGGER.warning(start + "\n" + goal);
+        return parentMap != null && start != null && goal != null;
     }
 
     /**
@@ -330,7 +340,7 @@ public class MapGraph {
      * @param start
      * @param goal
      * @return
-     * @see https://en.wikipedia.org/wiki/A*_search_algorithm
+     * @see <a href = "https://en.wikipedia.org/wiki/A*_search_algorithm"> </a>
      */
     private double getReducedCost(GeographicPoint start, GeographicPoint goal) {
         double red_cost = (Math.sqrt(Math.pow((start.x - goal.x), 2) + Math.pow((start.y - goal.y), 2)));
@@ -378,25 +388,29 @@ public class MapGraph {
      * @return The list of intersections that form the shortest (unweighted)
      * path from start to goal (including both start and goal).
      */
-    public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
-        // TODO: Implement this method in WEEK 2
+    public List<GeographicPoint> bfs(final GeographicPoint start, final GeographicPoint goal,
+                                     final Consumer<GeographicPoint> nodeSearched) {
+        //Implemented this method in WEEK 2
         if (start == null || goal == null) {
             throw new NullPointerException("Cannot find route from or to null node");
         }
-        MapNode startNode = listNodes.get(start);
-        MapNode endNode = listNodes.get(goal);
+
+        final MapNode startNode = listNodes.get(start);
+        final MapNode endNode = listNodes.get(goal);
+
         if (startNode == null) {
-            System.err.println("Start node " + start + " does not exist");
+            LOGGER.warning("Start node " + start + " does not exist");
             return null;
         }
         if (endNode == null) {
-            System.err.println("End node " + goal + " does not exist");
+            LOGGER.warning("End node " + goal + " does not exist");
             return null;
         }
+
         // setup to begin BFS
-        HashMap<MapNode, MapNode> parentMap = new HashMap<MapNode, MapNode>();
-        Queue<MapNode> toExplore = new LinkedList<MapNode>();
-        HashSet<MapNode> visited = new HashSet<MapNode>();
+        final HashMap<MapNode, MapNode> parentMap = new HashMap<>();
+        final Queue<MapNode> toExplore = new LinkedList<>();
+        final HashSet<MapNode> visited = new HashSet<>();
 
         toExplore.add(startNode);
         MapNode next = null;
@@ -416,14 +430,21 @@ public class MapGraph {
                     toExplore.add(neighbor);
                 }
             }
+// TODO: 10/4/2017 as java8 style
+//            neighbors.stream()
+//                    .filter(visited::contains)
+//                    .forEach(neighbor -> {
+//                        visited.add(neighbor);
+//                        parentMap.put(neighbor, next);
+//                        toExplore.add(neighbor);
+//                    });
         }
         if (!next.equals(endNode)) {
-            System.out.println("No path found from " + start + " to " + goal);
+            LOGGER.warning("No path found from " + start + " to " + goal);
             return null;
         }
         // Reconstruct the parent path
-        List<GeographicPoint> path = reconstructPath(parentMap, startNode, endNode);
-        return path;
+        return reconstructPath(parentMap, startNode, endNode);
     }
 
 
@@ -441,7 +462,7 @@ public class MapGraph {
      * @return The list of intersections that form the shortest path from
      * start to goal (including both start and goal).
      */
-    public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal) {
+    public List<GeographicPoint> dijkstra(final GeographicPoint start, final GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
         // You do not need to change this method.
         Consumer<GeographicPoint> temp = (x) -> {
@@ -458,30 +479,31 @@ public class MapGraph {
      * @return The list of intersections that form the shortest path from
      * start to goal (including both start and goal).
      */
-    public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
-        // TODO: Implement this method in WEEK 3
-        List<GeographicPoint> lfs = new LinkedList<>();
+    public List<GeographicPoint> dijkstra(final GeographicPoint start, final GeographicPoint goal,
+                                          final Consumer<GeographicPoint> nodeSearched) {
+        //implemented this method in WEEK 3
+        List<GeographicPoint> lfs;
         if (listNodes.containsKey(start) && listNodes.containsKey(goal)) {
             //initialize ADT
             //we should use a comparator!!!
-            Comparator<MapNode> cmtr = createComparator();
-            PriorityQueue<MapNode> pq = new PriorityQueue<>(5, cmtr);
-            HashMap<MapNode, MapNode> parentMap = new HashMap<>();
-            Set<MapNode> visited = new HashSet<>();
-            //set a distance to infinity
-            for (Map.Entry<GeographicPoint, MapNode> entry : listNodes.entrySet()) {
-                entry.getValue().setDistance(Double.POSITIVE_INFINITY);
-            }
-            //get a start and goal node
-            MapNode startNode = listNodes.get(start);
-            MapNode goalNode = listNodes.get(goal);
+            final Comparator<MapNode> cmtr = createComparator();
+            final PriorityQueue<MapNode> pq = new PriorityQueue<>(5, cmtr);
+            final HashMap<MapNode, MapNode> parentMap = new HashMap<>();
+            final Set<MapNode> visited = new HashSet<>();
+            //set a distance for all nodes to infinity
+            listNodes.entrySet().forEach(entry -> entry.getValue().setDistance(Double.POSITIVE_INFINITY));
+
+            //getting a start and goal node
+            final MapNode startNode = listNodes.get(start);
+            final MapNode goalNode = listNodes.get(goal);
             //set a distance start node as 0
             startNode.setDistance(0.0);
             //start working with a PriorityQueue
             pq.add(startNode);
             //start a loop through PriorityQueue
+            MapNode curr = null;
             while (!pq.isEmpty()) {
-                MapNode curr = pq.poll();
+                curr = pq.poll();
                 //--------------------------------------------
                 // hook for visualization
                 nodeSearched.accept(curr.getNodeLocation());
@@ -507,6 +529,13 @@ public class MapGraph {
                     }
                 }
             }
+
+            //it just because we havent got the full road map in some cases
+            if (!curr.equals(goalNode)) {
+                LOGGER.warning("No path found from " + start + " to " + goal);
+                return null;
+            }
+
             lfs = reconstructPath(parentMap, startNode, goalNode);
         } else {
             throw new NullPointerException("Cannot find route from or to null node");
