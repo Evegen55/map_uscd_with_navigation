@@ -43,6 +43,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.AlgorithmsTypes;
 import util.PathsToTheData;
 
 import java.util.Arrays;
@@ -120,6 +121,7 @@ public class MapApp extends Application
         LOGGER.info("create radio buttons for selecting search algorithm");
         final ToggleGroup group = new ToggleGroup();
         final List<RadioButton> searchOptions = setupToggle(group);
+        LOGGER.info("Radio buttons for selecting search algorithm created");
 
 
         LOGGER.info(" Select and marker managers for route choosing and marker display/visuals \n" +
@@ -317,19 +319,19 @@ public class MapApp extends Application
     private LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
 
         // Use Dijkstra as default
-        final RadioButton rbD = new RadioButton("Dijkstra");
-        rbD.setUserData("Dijkstra");
+        final RadioButton rbD = new RadioButton(AlgorithmsTypes.DIJKSTRA.toString());
+        rbD.setUserData(AlgorithmsTypes.DIJKSTRA);
         rbD.setSelected(true);
 
-        RadioButton rbA = new RadioButton("A*");
-        rbA.setUserData("A*");
+        RadioButton rbA = new RadioButton(AlgorithmsTypes.A_STAR.toString());
+        rbA.setUserData(AlgorithmsTypes.A_STAR);
 
-        RadioButton rbB = new RadioButton("BFS");
-        rbB.setUserData("BFS");
+        RadioButton rbB = new RadioButton(AlgorithmsTypes.BFS.toString());
+        rbB.setUserData(AlgorithmsTypes.BFS);
 
         //add new buttons with searching methods by the time
-        RadioButton rbBD = new RadioButton("Dijkstra by the time");
-        rbBD.setUserData("D_time");
+        RadioButton rbBD = new RadioButton(AlgorithmsTypes.D_TIME.toString());
+        rbBD.setUserData(AlgorithmsTypes.D_TIME);
 
         rbB.setToggleGroup(group);
         rbD.setToggleGroup(group);
