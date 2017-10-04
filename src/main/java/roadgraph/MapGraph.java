@@ -246,22 +246,13 @@ public class MapGraph {
     private List<GeographicPoint> reconstructPath(final HashMap<MapNode, MapNode> parentMap, final MapNode start,
                                                   final MapNode goal) {
         final LinkedList<GeographicPoint> path = new LinkedList<>();
-        if (!checkForNulls(parentMap, start, goal)) {
-            MapNode current = goal;
-            while ((current != null) && (!current.equals(start))) {
-                path.addFirst(current.getNodeLocation());
-                current = parentMap.get(current);
-            }
-            path.addFirst(start.getNodeLocation());
-        } else {
-            // TODO: 10/4/2017 smth
+        MapNode current = goal;
+        while ((current != null) && (!current.equals(start))) {
+            path.addFirst(current.getNodeLocation());
+            current = parentMap.get(current);
         }
+        path.addFirst(start.getNodeLocation());
         return path;
-    }
-
-    private boolean checkForNulls(final HashMap<MapNode, MapNode> parentMap, final MapNode start, final MapNode goal) {
-//        LOGGER.warning(start + "\n" + goal);
-        return parentMap != null && start != null && goal != null;
     }
 
     /**
