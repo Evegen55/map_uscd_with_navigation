@@ -492,41 +492,55 @@ public class MapGraph {
             //start working with a PriorityQueue
             mapNodePriorityQueue.add(startNode);
             //start a loop through PriorityQueue
-            MapNode curr = null;
+            MapNodeCheckContainer mapNodeCheckContainer = new MapNodeCheckContainer();
             while (!mapNodePriorityQueue.isEmpty()) {
-                curr = mapNodePriorityQueue.poll();
+                MapNode current = mapNodePriorityQueue.poll();
+                mapNodeCheckContainer.setMapNode(current);
                 //--------------------------------------------
                 // hook for visualization
-                nodeSearched.accept(curr.getNodeLocation());
+                nodeSearched.accept(current.getNodeLocation());
                 //--------------------------------------------
-                if (!visited.contains(curr)) {
-                    visited.add(curr);
-                    if ((goal.toString().compareTo(curr.getNodeLocation().toString())) == 0) break;
-                    //for each of curr's neighbors, "next", ->
-                    List<MapNode> neighbors = getNeighbours(curr);
-                    for (MapNode next : neighbors) {
+                if (!visited.contains(current)) {
+                    visited.add(current);
+                    if ((goal.toString().compareTo(current.getNodeLocation().toString())) == 0) break;
+                    //for each of current's neighbors, "next", ->
+//                    List<MapNode> neighbors = getNeighbours(current);
+//                    for (MapNode next : neighbors) {
+//                        //not in visited set ->
+//                        if (!visited.contains(next)) {
+//                            //if path through current to n is shorter ->
+//                            double edgeLength = getLengthEdgeBeetwen(current, next);
+//                            if (current.getDistance() + edgeLength < next.getDistance()) {
+//                                //update next's distance
+//                                next.setDistance(current.getDistance() + edgeLength);
+//                                parentMap.put(next, current);
+//                            }
+//                            //enqueue into the mapNodePriorityQueue
+//                            mapNodePriorityQueue.add(next);
+//                        }
+//                    }
+                    getNeighbours(current).forEach(neigbour -> {
                         //not in visited set ->
-                        if (!visited.contains(next)) {
-                            //if path through curr to n is shorter ->
-                            double edgeLength = getLengthEdgeBeetwen(curr, next);
-                            if (curr.getDistance() + edgeLength < next.getDistance()) {
-                                //update next's distance
-                                next.setDistance(curr.getDistance() + edgeLength);
-                                parentMap.put(next, curr);
+                        if (!visited.contains(neigbour)) {
+                            //if path through current to n is shorter ->
+                            double edgeLength = getLengthEdgeBeetwen(current, neigbour);
+                            if (current.getDistance() + edgeLength < neigbour.getDistance()) {
+                                //update neigbour's distance
+                                neigbour.setDistance(current.getDistance() + edgeLength);
+                                parentMap.put(neigbour, current);
                             }
                             //enqueue into the mapNodePriorityQueue
-                            mapNodePriorityQueue.add(next);
+                            mapNodePriorityQueue.add(neigbour);
                         }
-                    }
+                    });
                 }
             }
 
             //it just because we havent got the full road map in some cases
-            if (!curr.equals(goalNode)) {
+            if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
                 LOGGER.warning("No path found from " + start + " to " + goal);
                 return null;
             }
-
             lfs = reconstructPath(parentMap, startNode, goalNode);
         } else {
             throw new NullPointerException("Cannot find route from or to null node");
@@ -569,55 +583,56 @@ public class MapGraph {
         if (listNodes.containsKey(start) && listNodes.containsKey(goal)) {
             //initialize ADT
             //we should use a comparator!!!
-            Comparator<MapNode> cmtr = createComparator();
-            PriorityQueue<MapNode> pq = new PriorityQueue<>(5, cmtr);
-            HashMap<MapNode, MapNode> parentMap = new HashMap<>();
-            Set<MapNode> visited = new HashSet<>();
+            final Comparator<MapNode> mapNodeComparator = createComparator();
+            final PriorityQueue<MapNode> mapNodePriorityQueue = new PriorityQueue<>(5, mapNodeComparator);
+            final HashMap<MapNode, MapNode> parentMap = new HashMap<>();
+            final Set<MapNode> visited = new HashSet<>();
             //set a distance to infinity
-            for (Map.Entry<GeographicPoint, MapNode> entry : listNodes.entrySet()) {
-                entry.getValue().setDistance(Double.POSITIVE_INFINITY);
-            }
+            listNodes.entrySet().forEach(entry -> entry.getValue().setDistance(Double.POSITIVE_INFINITY));
             //getting a  reduced cost
-            double redCost = getReducedCost(start, goal);                                             //System.out.println(redCost);
+            double redCost = getReducedCost(start, goal);
+            LOGGER.info("getting a  reduced cost \t" + redCost);
             //get a start and goal node
-            MapNode startNode = listNodes.get(start);
-            MapNode goalNode = listNodes.get(goal);
+            final MapNode startNode = listNodes.get(start);
+            final MapNode goalNode = listNodes.get(goal);
             //set a distance start node as 0
             startNode.setDistance(0.0);
             //start working with a PriorityQueue
-            pq.add(startNode);
+            mapNodePriorityQueue.add(startNode);
             //start a loop through PriorityQueue
-            while (!pq.isEmpty()) {
-                MapNode curr = pq.poll();
+            MapNodeCheckContainer mapNodeCheckContainer = new MapNodeCheckContainer();
+            while (!mapNodePriorityQueue.isEmpty()) {
+                MapNode current = mapNodePriorityQueue.poll();
+                mapNodeCheckContainer.setMapNode(current);
                 //--------------------------------------------
                 // hook for visualization
-                nodeSearched.accept(curr.getNodeLocation());
+                nodeSearched.accept(current.getNodeLocation());
                 //--------------------------------------------
-                if (!visited.contains(curr)) {
-                    visited.add(curr);
-                    if (goal.toString().equalsIgnoreCase(curr.getNodeLocation().toString())) break;
-                    //for each of curr's neighbors, "next", ->
-                    List<MapNode> neighbors = getNeighbours(curr);
-                    for (MapNode next : neighbors) {
+                if (!visited.contains(current)) {
+                    visited.add(current);
+                    if (goal.toString().equalsIgnoreCase(current.getNodeLocation().toString())) break;
+                    getNeighbours(current).forEach(neighbour -> {
                         //not in visited set ->
-                        if (!visited.contains(next)) {
-                            //if path through curr to n is shorter ->
-                            double edgeLength = getLengthEdgeBeetwen(curr, next);
-                            if ((curr.getDistance() + edgeLength < next.getDistance())
-                                    && getReducedCost(curr.getNodeLocation(), goal) <= redCost
-                                    ) {
-                                //test it
-                                //System.out.println(getReducedCost(curr.getNodeLocation(),goal));
-
-                                //update next's distance
-                                next.setDistance(curr.getDistance() + edgeLength);
-                                parentMap.put(next, curr);
+                        if (!visited.contains(neighbour)) {
+                            //if path through current to n is shorter ->
+                            double edgeLength = getLengthEdgeBeetwen(current, neighbour);
+                            if ((current.getDistance() + edgeLength < neighbour.getDistance())
+                                    && getReducedCost(current.getNodeLocation(), goal) <= redCost) {
+                                LOGGER.fine("" + getReducedCost(current.getNodeLocation(), goal));
+                                //update neighbour's distance
+                                neighbour.setDistance(current.getDistance() + edgeLength);
+                                parentMap.put(neighbour, current);
                             }
-                            //enqueue into the pq
-                            pq.add(next);
+                            //enqueue into the mapNodePriorityQueue
+                            mapNodePriorityQueue.add(neighbour);
                         }
-                    }
+                    });
                 }
+            }
+            //it just because we havent got the full road map in some cases
+            if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
+                LOGGER.warning("No path found from " + start + " to " + goal);
+                return null;
             }
             lfs = reconstructPath(parentMap, startNode, goalNode);
         } else {
