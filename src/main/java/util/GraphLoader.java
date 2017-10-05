@@ -15,6 +15,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,24 +24,27 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class GraphLoader {
 
+    private final static Logger LOGGER = Logger.getLogger(GraphLoader.class.getName());
+
     /**
-     * 	 * The file contains data lines as follows:
+     * * The file contains data lines as follows:
      * lat1 lon1 lat2 lon2 roadName roadType
-     *
+     * <p>
      * where each line is a segment of a road
      * These road segments are assumed to be ONE WAY.
-     *
+     * <p>
      * This method will collapse the points so that only intersections
      * are represented as nodes in the graph.
      *
-     * @param roadDataFile The file containing the road data, in the format
-     *   described.
+     * @param roadDataFile      The file containing the road data, in the format
+     *                          described.
      * @param intersectionsFile The output file containing the intersections.
      */
     public static void createIntersectionsFile(String roadDataFile, String intersectionsFile) {
@@ -83,48 +88,45 @@ public class GraphLoader {
 
 
     /**
-     *
-     *  Read in a file specifying a map.
-     *
+     * Read in a file specifying a map.
+     * <p>
      * The file contains data lines as follows:
      * lat1 lon1 lat2 lon2 roadName roadType
-     *
+     * <p>
      * where each line is a segment of a road
      * These road segments are assumed to be ONE WAY.
-     *
+     * <p>
      * This method will collapse the points so that only intersections
      * are represented as nodes in the graph.
      *
      * @param filename The file containing the road data, in the format
-     *   described.
-     * @param map The graph to load the map into.  The graph is
-     *   assumed to be directed.
-     * @param segments The collection of RoadSegments that define the
-     *   shape of a road.  These segments are maintained separately from
-     *   the graph as they are only used to display paths.
+     *                 described.
+     * @param map      The graph to load the map into.  The graph is
+     *                 assumed to be directed.
      */
-    public static void loadRoadMap(String filename, roadgraph.MapGraph map) {
+    public static void loadRoadMap(final String filename, final roadgraph.MapGraph map) {
         loadRoadMap(filename, map, null, null);
     }
 
 
     /**
-     *  Read in a file specifying a map.
-     *
+     * Read in a file specifying a map.
+     * <p>
      * The file contains data lines as follows:
      * lat1 lon1 lat2 lon2 roadName roadType
-     *
+     * <p>
      * where each line is a segment of a road
      * These road segments are assumed to be ONE WAY.
-     *
+     * <p>
      * This method will collapse the points so that only intersections
      * are represented as nodes in the graph.
      *
      * @param filename The file containing the road data, in the format
-     *   described.
-     * @param map The graph to load the map into.  The graph is
-     *   assumed to be directed.
+     *                 described.
+     * @param map      The graph to load the map into.  The graph is
+     *                 assumed to be directed.
      */
+    // TODO: 10/5/2017 JAVA8!!!
     public static void loadRoadMap(final String filename, final roadgraph.MapGraph map,
                                    final HashMap<GeographicPoint, HashSet<RoadSegment>> segments,
                                    final Set<GeographicPoint> intersectionsToLoad) {
@@ -134,38 +136,40 @@ public class GraphLoader {
         HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap = buildPointMapOneWay(filename);
 
         // Add the nodes to the graph
-        List<GeographicPoint> intersections = findIntersections(pointMap);
 
-        for (GeographicPoint pt : intersections) {
-            map.addVertex(pt);
-            if (intersectionsToLoad != null) {
-                intersectionsToLoad.add(pt);
-            }
-            nodes.add(pt);
+        if (intersectionsToLoad != null) {
+            findIntersections(pointMap).forEach(intersection -> {
+                map.addVertex(intersection);
+                nodes.add(intersection);
+                intersectionsToLoad.add(intersection);
+            });
+        } else {
+            findIntersections(pointMap).forEach(intersection -> {
+                map.addVertex(intersection);
+                nodes.add(intersection);
+            });
         }
-
 
         addEdgesAndSegments(nodes, pointMap, map, segments);
     }
 
 
     /**
-     *
-     *  Read in a file specifying a map.
-     *
+     * Read in a file specifying a map.
+     * <p>
      * The file contains data lines as follows:
      * lat1 lon1 lat2 lon2 roadName roadType
-     *
+     * <p>
      * where each line is a segment of a road
      * These road segments are assumed to be ONE WAY.
-     *
+     * <p>
      * This method will collapse the points so that only intersections
      * are represented as nodes in the graph.
      *
      * @param filename The file containing the road data, in the format
-     *   described.
+     *                 described.
      * @param theGraph The graph to load the map into.  The graph is
-     *   assumed to be directed.
+     *                 assumed to be directed.
      */
     public static void loadRoadMap(String filename, basicgraph.Graph theGraph) {
         HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap =
@@ -204,13 +208,15 @@ public class GraphLoader {
         }
     }
 
-    /** Read in a file specifying route maps between airports.
+    /**
+     * Read in a file specifying route maps between airports.
      * The file contains data as follows:
      * Airline, AirlineID, Source airport, Source airport ID,
      * Destination airport, Destination airport ID, Codeshare, Stops, Equipment
      * This method will only read in nonstop routes (with Stops == 0)
      * Vertices are airports (labeled with Strings)
      * Edges represent nonstop routes
+     *
      * @param filename
      * @param graph
      */
@@ -267,7 +273,7 @@ public class GraphLoader {
      * Loads a graph from a file.  The file is specified with each
      * line representing an edge.  Vertices are numbered from
      * 0..1-numVertices.
-     *
+     * <p>
      * The first line of the file contains a single int which is the
      * number of vertices in the graph.
      * e.g.
@@ -503,32 +509,43 @@ public class GraphLoader {
     // are lists of length two where each entry in the list is a list.
     // The first list stores the outgoing roads while the second
     // stores the outgoing roads.
-    // TODO: 10/5/2017 use Java8
     private static HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>>  buildPointMapOneWay(final String filename) {
-        BufferedReader reader = null;
-        HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap =  new HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>>();
-        try {
+        HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap =  new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String nextLine;
-            reader = new BufferedReader(new FileReader(filename));
             // Read the lines out of the file and put them in a HashMap by points
             while ((nextLine = reader.readLine()) != null) {
                 RoadLineInfo line = splitInputString(nextLine);
                 addToPointsMapOneWay(line, pointMap);
             }
-            reader.close();
         } catch (IOException e) {
-            System.err.println("Problem loading dictionary file: " + filename);
+            LOGGER.warning("Problem loading dictionary file: " + filename);
             e.printStackTrace();
         }
-
         return pointMap;
+
+//JAVA8 version - but it throws mailformed exception...
+//        final HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap = new HashMap<>();
+//        try {
+//            LOGGER.info("Start read from file");
+//            Files.lines(Paths.get(filename)).forEach(nextLine -> {
+//                System.out.println(nextLine);
+//                RoadLineInfo line = splitInputString(nextLine);
+//                addToPointsMapOneWay(line, pointMap);
+//
+//            });
+//            LOGGER.info("End read from file");
+//        } catch (IOException e) {
+//            LOGGER.warning("Problem loading dictionary file: " + filename);
+//            e.printStackTrace();
+//        }
+//        return pointMap;
     }
 
 
     // Add the next line read from the file to the points map.
     private static void
-    addToPointsMapOneWay(RoadLineInfo line,
-                         HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> map) {
+    addToPointsMapOneWay(final RoadLineInfo line, final HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> map) {
         List<LinkedList<RoadLineInfo>> pt1Infos = map.get(line.point1);
         if (pt1Infos == null) {
             pt1Infos = new ArrayList<LinkedList<RoadLineInfo>>();
@@ -602,10 +619,12 @@ class RoadLineInfo {
     String roadName;
     String roadType;
 
-    /** Create a new RoadLineInfo object to store information about the line
+    /**
+     * Create a new RoadLineInfo object to store information about the line
      * read from the file
-     * @param p1 One of the points
-     * @param p2 The other point
+     *
+     * @param p1       One of the points
+     * @param p2       The other point
      * @param roadName The name of the road
      * @param roadType The type of the road
      */
@@ -617,7 +636,9 @@ class RoadLineInfo {
     }
 
 
-    /** Get the other point from this roadLineInfo */
+    /**
+     * Get the other point from this roadLineInfo
+     */
     public GeographicPoint getOtherPoint(GeographicPoint pt) {
         if (pt == null) throw new IllegalArgumentException();
         if (pt.equals(point1)) {
@@ -627,7 +648,8 @@ class RoadLineInfo {
         } else throw new IllegalArgumentException();
     }
 
-    /** Two RoadLineInfo objects are considered equal if they have the same
+    /**
+     * Two RoadLineInfo objects are considered equal if they have the same
      * two points and the same roadName and roadType.
      */
     public boolean equals(Object o) {
@@ -640,7 +662,9 @@ class RoadLineInfo {
 
     }
 
-    /** Calculate the hashCode based on the hashCodes of the two points
+    /**
+     * Calculate the hashCode based on the hashCodes of the two points
+     *
      * @return The hashcode for this object.
      */
     public int hashCode() {
@@ -648,8 +672,10 @@ class RoadLineInfo {
 
     }
 
-    /** Returns whether these segments are part of the same road in terms of
+    /**
+     * Returns whether these segments are part of the same road in terms of
      * road name and road type.
+     *
      * @param info The RoadLineInfo to compare against.
      * @return true if these represent the same road, false otherwise.
      */
@@ -657,20 +683,25 @@ class RoadLineInfo {
         return info.roadName.equals(this.roadName) && info.roadType.equals(this.roadType);
     }
 
-    /** Return a copy of this LineInfo in the other direction */
+    /**
+     * Return a copy of this LineInfo in the other direction
+     */
     public RoadLineInfo getReverseCopy() {
         return new RoadLineInfo(this.point2, this.point1, this.roadName, this.roadType);
     }
 
-    /** Return true if this road is the same segment as other, but in reverse
-     *   Otherwise return false.
+    /**
+     * Return true if this road is the same segment as other, but in reverse
+     * Otherwise return false.
      */
     public boolean isReverse(RoadLineInfo other) {
         return this.point1.equals(other.point2) && this.point2.equals(other.point1) &&
                 this.roadName.equals(other.roadName) && this.roadType.equals(other.roadType);
     }
 
-    /** Return the string representation of this LineInfo. */
+    /**
+     * Return the string representation of this LineInfo.
+     */
     public String toString() {
         return this.point1 + " " + this.point2 + " " + this.roadName + " " + this.roadType;
 

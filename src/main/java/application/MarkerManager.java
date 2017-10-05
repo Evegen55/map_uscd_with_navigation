@@ -190,7 +190,7 @@ public class MarkerManager {
         return selectMode;
     }
 
-    public static MarkerOptions createDefaultOptions(LatLong coord) {
+    static MarkerOptions createDefaultOptions(final LatLong coord) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.animation(null)
                 .icon(markerURL)
@@ -235,17 +235,19 @@ public class MarkerManager {
         dataSet.initializeGraph();
         bounds = new LatLongBounds();
 
-        dataSet.getIntersections().forEach(geographicPoint -> {
-            LatLong ll = new LatLong(geographicPoint.getX(), geographicPoint.getY());
-            MarkerOptions markerOptions = createDefaultOptions(ll);
-            bounds.extend(ll);
-            Marker marker = new Marker(markerOptions);
-            registerEvents(marker, geographicPoint);
-            map.addMarker(marker);
-            putMarker(geographicPoint, marker);
-            markerPositions.add(geographicPoint);
+        //it is slow just because it invokes javaScript function.
+        dataSet.getIntersections().stream()
+                .forEach(geographicPoint -> {
+                    LatLong latLong = new LatLong(geographicPoint.getX(), geographicPoint.getY());
+                    MarkerOptions markerOptions = createDefaultOptions(latLong);
+                    bounds.extend(latLong);
+                    Marker marker = new Marker(markerOptions);
+                    registerEvents(marker, geographicPoint);
+                    map.addMarker(marker);
+                    putMarker(geographicPoint, marker);
+                    markerPositions.add(geographicPoint);
 //            marker.setZIndex(DEFAULT_Z);
-        });
+                });
 
         map.fitBounds(bounds);
         LOGGER.info("End of display Intersections");
