@@ -28,7 +28,6 @@ public class RouteVisualization {
     private List<geography.GeographicPoint> points;
     private ArrayList<Marker> markerList;
     private MarkerManager manager;
-    private JavascriptArray markers;
     private IJavascriptRuntime runtime;
 
     public RouteVisualization(final MarkerManager manager) {

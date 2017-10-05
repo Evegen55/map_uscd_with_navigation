@@ -18,6 +18,10 @@ import util.PathsToTheData;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 public class FetchController {
@@ -37,13 +41,13 @@ public class FetchController {
 
 
     public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
-                           Button fetchButton, ComboBox<DataSet> cb, Button displayButton) {
+                           Button fetchButton, ComboBox<DataSet> dataSetComboBox, Button displayButton) {
         this.generalService = generalService;
         this.routeService = routeService;
         this.fetchButton = fetchButton;
         this.displayButton = displayButton;
         this.writeFile = writeFile;
-        dataChoices = cb;
+        dataChoices = dataSetComboBox;
         setupComboCells();
         setupFetchButton();
         setupDisplayButton();

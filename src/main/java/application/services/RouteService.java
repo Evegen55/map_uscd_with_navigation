@@ -152,13 +152,12 @@ public class RouteService {
      * @return list of LatLongs corresponding the path of route
      */
     private List<LatLong> constructMapPath(List<geography.GeographicPoint> path) {
-        List<LatLong> retVal = new ArrayList<LatLong>();
-        List<geography.GeographicPoint> segmentList = null;
+        List<LatLong> retVal = new ArrayList<>();
+        List<geography.GeographicPoint> segmentList;
         geography.GeographicPoint curr;
         geography.GeographicPoint next;
 
         geography.RoadSegment chosenSegment = null;
-        ;
 
         for (int i = 0; i < path.size() - 1; i++) {
             double minLength = Double.MAX_VALUE;
@@ -189,9 +188,8 @@ public class RouteService {
                         retVal.add(new LatLong(point.getX(), point.getY()));
                     }
                 } else {
-                    System.err.println("ERROR in constructMapPath : chosenSegment was null");
+                    LOGGER.warning("ERROR in constructMapPath : chosenSegment was null");
                 }
-                // find
 
             }
         }
@@ -200,17 +198,11 @@ public class RouteService {
         return retVal;
     }
 
-
     private void removeRouteLine() {
         if (routeLine != null) {
             map.removeMapShape(routeLine);
         }
     }
-
-//    private void setMarkerManager(MarkerManager manager) {
-//    	this.markerManager = manager;
-//    }
-
 
 }
 

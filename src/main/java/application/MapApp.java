@@ -91,13 +91,13 @@ public class MapApp extends Application
         final Button fetchButton = new Button("Fetch Data");
         final Button displayButton = new Button("Show Intersections");
         final TextField tf = new TextField();
-        final ComboBox<DataSet> cb = new ComboBox<>();
+        final ComboBox<DataSet> dataSetComboBox = new ComboBox<>();
 
         // set on mouse pressed, this fixes Windows 10 / Surface bug
-        cb.setOnMousePressed(e -> cb.requestFocus());
+        dataSetComboBox.setOnMousePressed(e -> dataSetComboBox.requestFocus());
 
         final HBox fetchControls = getBottomBox(tf, fetchButton);
-        final VBox fetchBox = getFetchBox(displayButton, cb);
+        final VBox fetchBox = getFetchBox(displayButton, dataSetComboBox);
 
 
         LOGGER.info("create components for fetch tab");
@@ -152,7 +152,7 @@ public class MapApp extends Application
             LOGGER.info("initialize controllers");
             new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
                     startLabel, endLabel, pointLabel, manager, markerManager);
-            new FetchController(gs, rs, tf, fetchButton, cb, displayButton);
+            new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton);
         });
 
         LOGGER.info("Add components to border pane");
