@@ -131,9 +131,11 @@ public class GeneralService {
         return null;
     }
 
-    public void runFetchTask(String fName, ComboBox<DataSet> dataSetComboBox, Button button) {
+    // TODO: 10/5/2017 put the map file into ADT in-memory continuously through scrolling
+    // TODO: 10/5/2017 unload data on-premises by asking a user when program has to be terminated
+    public void runFetchTask(final String fileName, final ComboBox<DataSet> dataSetComboBox, final Button button) {
         float[] arr = getBoundsArray();
-        final Task<String> task = formTaskToFetchData(fName, dataSetComboBox, button, arr);
+        final Task<String> task = formTaskToFetchData(fileName, dataSetComboBox, button, arr);
         EXECUTOR_SERVICE.submit(task);
     }
 

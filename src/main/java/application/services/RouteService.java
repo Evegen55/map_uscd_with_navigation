@@ -10,6 +10,7 @@ import gmapsfx.javascript.object.LatLong;
 import gmapsfx.javascript.object.LatLongBounds;
 import gmapsfx.javascript.object.MVCArray;
 import gmapsfx.shapes.Polyline;
+import gmapsfx.shapes.PolylineOptions;
 import roadgraph.MapGraph;
 
 import java.util.ArrayList;
@@ -47,27 +48,28 @@ public class RouteService {
      *
      * @return returns false if route fails to display
      */
-    private boolean displayRoute(List<LatLong> route) {
+    private boolean displayRoute(final List<LatLong> route) {
 
         if (routeLine != null) {
             removeRouteLine();
         }
-        routeLine = new Polyline();
+
         MVCArray path = new MVCArray();
         LatLongBounds bounds = new LatLongBounds();
         for (LatLong point : route) {
             path.push(point);
             bounds = bounds.extend(point);
         }
-        routeLine.setPath(path);
 
+        //use PolylineOptions to manage color instead empty constructor
+        PolylineOptions polylineOptions = new PolylineOptions();
+        //or "red" or anything as in CSS style
+        //also the color may depends on the road situation
+        polylineOptions.strokeColor("#42c8f4");
+        polylineOptions.path(path);
+
+        routeLine = new Polyline(polylineOptions);
         map.addMapShape(routeLine);
-
-        //System.out.println(bounds.getNorthEast());
-        //EXCEPTION getBounds() messed up??
-        //System.out.println(routeLine.getBounds());
-
-
         markerManager.hideIntermediateMarkers();
         map.fitBounds(bounds);
         markerManager.disableVisButton(false);
@@ -95,7 +97,6 @@ public class RouteService {
     }
 
     /**
-     *
      * @param start
      * @param end
      * @param toggle
@@ -128,6 +129,7 @@ public class RouteService {
                     MapApp.showInfoAlert("Routing Error : ", "No path found");
                     return false;
                 }
+                LOGGER.info("Path was found successfully");
                 // TODO -- debug road segments
                 List<LatLong> mapPath = constructMapPath(path);
                 //List<LatLong> mapPath = new ArrayList<LatLong>();

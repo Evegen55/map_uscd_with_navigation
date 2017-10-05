@@ -14,4 +14,7 @@ public interface PathsToTheData {
 
     String HTML_ROUTING_CSS = "html/routing.css";
     String DATA_FILE_DIR_STR = "data/maps/";
+
+    // path for mapfiles to load when program starts
+    String PERSIST_PATH = "data/maps/mapfiles.list";
 }
