@@ -54,14 +54,16 @@ public class FetchController {
     }
 
     private void loadDataSets() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(PathsToTheData.PERSIST_PATH))) {
-            String line = reader.readLine();
-            while (line != null) {
-                dataChoices.getItems().add(new DataSet(GeneralService.getDataSetDirectory() + line));
-                line = reader.readLine();
-            }
+        try {
+            Files.lines(Paths.get(PathsToTheData.PERSIST_PATH)).forEach(line -> {
+                LOGGER.fine(line);
+                final String path = GeneralService.getDataSetDirectory() + line;
+                LOGGER.fine(path);
+                dataChoices.getItems().add(new DataSet(path));
+            });
         } catch (IOException e) {
             LOGGER.warning("No existing map files found.");
+            // TODO: 10/5/2017 use file chooser in this case
             e.printStackTrace();
         }
     }
