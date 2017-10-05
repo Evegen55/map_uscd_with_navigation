@@ -112,7 +112,8 @@ public class RouteService {
                 LOGGER.info("Start find path");
                 markerManager.initVisualization();
                 final Consumer<geography.GeographicPoint> nodeAccepter = markerManager.getVisualization()::acceptPoint;
-                List<geography.GeographicPoint> path = null;
+
+                List<geography.GeographicPoint> path;
                 final MapGraph mapGraph = markerManager.getDataSet().getGraph();
                 if (toggle == RouteController.BFS) {
                     path = mapGraph.bfs(start, end, nodeAccepter);

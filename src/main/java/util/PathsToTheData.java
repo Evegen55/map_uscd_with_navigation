@@ -13,4 +13,5 @@ public interface PathsToTheData {
     String MOD_1_GRADER = "data/graders/mod1/graph";
 
     String HTML_ROUTING_CSS = "html/routing.css";
+    String DATA_FILE_DIR_STR = "data/maps/";
 }
