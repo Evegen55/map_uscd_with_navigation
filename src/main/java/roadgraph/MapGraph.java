@@ -9,7 +9,6 @@ package roadgraph;
 
 
 import geography.GeographicPoint;
-import util.GraphLoader;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -314,13 +313,10 @@ public class MapGraph {
      *
      * @return comparator
      */
-    public Comparator<MapNode> createComparatorByTime() {
-        Comparator<MapNode> comparator = new Comparator<MapNode>() {
-            @Override
-            public int compare(MapNode x, MapNode y) {
-                // You could return x.getDistance() - y.getDistance(), which would be more efficient.
-                return (int) (x.getTime() - y.getTime());
-            }
+    private Comparator<MapNode> createComparatorByTime() {
+        Comparator<MapNode> comparator = (x, y) -> {
+            // You could return x.getDistance() - y.getDistance(), which would be more efficient.
+            return (int) (x.getTime() - y.getTime());
         };
         return comparator;
     }
@@ -334,8 +330,7 @@ public class MapGraph {
      * @see <a href = "https://en.wikipedia.org/wiki/A*_search_algorithm"> </a>
      */
     private double getReducedCost(GeographicPoint start, GeographicPoint goal) {
-        double red_cost = (Math.sqrt(Math.pow((start.x - goal.x), 2) + Math.pow((start.y - goal.y), 2)));
-        return red_cost;
+        return (Math.sqrt(Math.pow((start.x - goal.x), 2) + Math.pow((start.y - goal.y), 2)));
     }
 
     /**
@@ -405,7 +400,6 @@ public class MapGraph {
 
         toExplore.add(startNode);
         MapNode next = null;
-
         while (!toExplore.isEmpty()) {
             next = toExplore.remove();
             //----------------------------
@@ -421,14 +415,6 @@ public class MapGraph {
                     toExplore.add(neighbor);
                 }
             }
-// TODO: 10/4/2017 as java8 style
-//            neighbors.stream()
-//                    .filter(visited::contains)
-//                    .forEach(neighbor -> {
-//                        visited.add(neighbor);
-//                        parentMap.put(neighbor, next);
-//                        toExplore.add(neighbor);
-//                    });
         }
         if (!next.equals(endNode)) {
             LOGGER.warning("No path found from " + start + " to " + goal);
@@ -503,34 +489,18 @@ public class MapGraph {
                 if (!visited.contains(current)) {
                     visited.add(current);
                     if ((goal.toString().compareTo(current.getNodeLocation().toString())) == 0) break;
-                    //for each of current's neighbors, "next", ->
-//                    List<MapNode> neighbors = getNeighbours(current);
-//                    for (MapNode next : neighbors) {
-//                        //not in visited set ->
-//                        if (!visited.contains(next)) {
-//                            //if path through current to n is shorter ->
-//                            double edgeLength = getLengthEdgeBeetwen(current, next);
-//                            if (current.getDistance() + edgeLength < next.getDistance()) {
-//                                //update next's distance
-//                                next.setDistance(current.getDistance() + edgeLength);
-//                                parentMap.put(next, current);
-//                            }
-//                            //enqueue into the mapNodePriorityQueue
-//                            mapNodePriorityQueue.add(next);
-//                        }
-//                    }
-                    getNeighbours(current).forEach(neigbour -> {
+                    getNeighbours(current).forEach(neighbour -> {
                         //not in visited set ->
-                        if (!visited.contains(neigbour)) {
+                        if (!visited.contains(neighbour)) {
                             //if path through current to n is shorter ->
-                            double edgeLength = getLengthEdgeBeetwen(current, neigbour);
-                            if (current.getDistance() + edgeLength < neigbour.getDistance()) {
-                                //update neigbour's distance
-                                neigbour.setDistance(current.getDistance() + edgeLength);
-                                parentMap.put(neigbour, current);
+                            double edgeLength = getLengthEdgeBeetwen(current, neighbour);
+                            if (current.getDistance() + edgeLength < neighbour.getDistance()) {
+                                //update neighbour's distance
+                                neighbour.setDistance(current.getDistance() + edgeLength);
+                                parentMap.put(neighbour, current);
                             }
                             //enqueue into the mapNodePriorityQueue
-                            mapNodePriorityQueue.add(neigbour);
+                            mapNodePriorityQueue.add(neighbour);
                         }
                     });
                 }
@@ -560,7 +530,7 @@ public class MapGraph {
      * @return The list of intersections that form the shortest path from
      * start to goal (including both start and goal).
      */
-    public List<GeographicPoint> aStarSearch(GeographicPoint start, GeographicPoint goal) {
+    public List<GeographicPoint> aStarSearch(final GeographicPoint start, final GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
         Consumer<GeographicPoint> temp = (x) -> {
         };
@@ -670,60 +640,63 @@ public class MapGraph {
      * @return The list of intersections that form the faster path from
      * start to goal (including both start and goal).
      */
-    public List<GeographicPoint> dijkstraByTime(GeographicPoint start, GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
+    public List<GeographicPoint> dijkstraByTime(final GeographicPoint start, final GeographicPoint goal,
+                                                final Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 3
-        List<GeographicPoint> lfs = new LinkedList<>();
+        List<GeographicPoint> lfs;
         if (listNodes.containsKey(start) && listNodes.containsKey(goal)) {
             //initialize ADT
             //we should use a comparator created depends on time!!!
-            Comparator<MapNode> cmtr = createComparatorByTime();
-            PriorityQueue<MapNode> pq = new PriorityQueue<>(5, cmtr);
-            HashMap<MapNode, MapNode> parentMap = new HashMap<>();
-            Set<MapNode> visited = new HashSet<>();
+            final Comparator<MapNode> comparatorByTime = createComparatorByTime();
+            final PriorityQueue<MapNode> pq = new PriorityQueue<>(5, comparatorByTime);
+            final HashMap<MapNode, MapNode> parentMap = new HashMap<>();
+            final Set<MapNode> visited = new HashSet<>();
             //set a time to goal to infinity
-            for (Map.Entry<GeographicPoint, MapNode> entry : listNodes.entrySet()) {
-                entry.getValue().setTime(Double.POSITIVE_INFINITY);
-            }
+            listNodes.entrySet().forEach(entry -> entry.getValue().setDistance(Double.POSITIVE_INFINITY));
             //get a start and goal node
-            MapNode startNode = listNodes.get(start);
-            MapNode goalNode = listNodes.get(goal);
+            final MapNode startNode = listNodes.get(start);
+            final MapNode goalNode = listNodes.get(goal);
             //set a time start node as 0
             startNode.setTime(0.0);
             //start working with a PriorityQueue
             pq.add(startNode);
             //start a loop through PriorityQueue
+            MapNodeCheckContainer mapNodeCheckContainer = new MapNodeCheckContainer();
             while (!pq.isEmpty()) {
-                MapNode curr = pq.poll();
+                MapNode current = pq.poll();
+                mapNodeCheckContainer.setMapNode(current);
                 //--------------------------------------------
                 // hook for visualization
-                nodeSearched.accept(curr.getNodeLocation());
+                nodeSearched.accept(current.getNodeLocation());
                 //--------------------------------------------
-                if (!visited.contains(curr)) {
-                    visited.add(curr);
-                    if ((goal.toString().compareTo(curr.getNodeLocation().toString())) == 0) break;
-                    //for each of curr's neighbors, "next", ->
-                    List<MapNode> neighbors = getNeighbours(curr);
-                    for (MapNode next : neighbors) {
+                if (!visited.contains(current)) {
+                    visited.add(current);
+                    if ((goal.toString().compareTo(current.getNodeLocation().toString())) == 0) break;
+                    //for each of current's neighbors, "next", ->
+                    getNeighbours(current).forEach(next -> {
                         //not in visited set ->
                         if (!visited.contains(next)) {
-                            //if path through curr to n is faster ->
-                            double timeToNextNode = getTimeBetweenNodes(curr, next);
-                            //test it
-                            //System.out.println("timeToNextNode" + "\t" +timeToNextNode);
-                            if (curr.getTime() + timeToNextNode < next.getTime()) {
+                            //if path through current to n is faster ->
+                            double timeToNextNode = getTimeBetweenNodes(current, next);
+                            LOGGER.fine("timeToNextNode" + "\t" + timeToNextNode);
+                            if (current.getTime() + timeToNextNode < next.getTime()) {
                                 //update next's speed Limit
-                                next.setTime(curr.getTime() + timeToNextNode);
-                                parentMap.put(next, curr);
+                                next.setTime(current.getTime() + timeToNextNode);
+                                parentMap.put(next, current);
                             }
                             //enqueue into the pq
                             pq.add(next);
                         }
-                    }
+                    });
                 }
+
             }
-            //test it
-            //System.out.println("--------------------------------------");
-            //printNodesMap(parentMap);
+            //it just because we havent got the full road map in some cases
+            if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
+                LOGGER.warning("No path found from " + start + " to " + goal);
+                return null;
+            }
+
             lfs = reconstructPath(parentMap, startNode, goalNode);
         } else {
             throw new NullPointerException("Cannot find route from or to null node");
@@ -815,88 +788,6 @@ public class MapGraph {
             throw new NullPointerException("Cannot find route from or to null node");
         }
         return lfs;
-    }
-
-
-    public static void main(String[] args) {
-        /*
-        System.out.print("Making a new map...");
-		MapGraph theMap = new MapGraph();
-		System.out.print("DONE. \nLoading the map...");
-		GraphLoader.loadRoadMap("data/testdata/simpletest.map", theMap);
-		System.out.println("DONE.");
-        */
-
-        //System.out.println("Num nodes: " + theMap.getNumVertices());
-        //System.out.println("Num edges: " + theMap.getNumEdges());
-        //List<GeographicPoint> route = theMap.dijkstra(new GeographicPoint(1.0,1.0), new GeographicPoint(8.0,-1.0));
-
-        //for (GeographicPoint gp: route) {
-        //	System.out.println(gp.toString());
-        //}
-
-
-        //-----------------------------------------------------
-        //basic map
-        //Use this code in Week 3 End of Week Quiz
-        /*
-
-		MapGraph theMap = new MapGraph();
-		System.out.print("DONE. \nLoading the map...");
-		GraphLoader.loadRoadMap("data/maps/utc.map", theMap);
-		System.out.println("DONE.");
-
-		GeographicPoint start = new GeographicPoint(32.8648772, -117.2254046);
-		GeographicPoint end = new GeographicPoint(32.8660691, -117.217393);
-
-		List<GeographicPoint> route_1 = theMap.bfs(start,end);
-		List<GeographicPoint> route_2 = theMap.dijkstra(start,end);
-		List<GeographicPoint> route_3 = theMap.aStarSearch(start,end);
-		List<GeographicPoint> route_4 = theMap.dijkstraBySpeed(start,end);
-		List<GeographicPoint> route_5 = theMap.aStarSearchByTime(start,end);
-
-		System.out.println(
-				"Using BFS algorithm to find SHORTEST path" + "\t" + route_1.size() + "\n" +
-				"Using Dijkstra algorithm to find SHORTEST path" + "\t" + route_2.size() + "\n" +
-				"Using A-star algorithm to find SHORTEST path" + "\t" + route_3.size() + "\n" +
-				"Using Dijkstra algorithm to find FASTER path" + "\t" + route_4.size() + "\n"
-				+
-				"Using A-star algorithm to find FASTER path" + "\t" + route_5.size()
-				);
-
-		*/
-
-        //-----------------------------------------------------
-        //another map
-
-        System.out.print("Making a new map...");
-        MapGraph mapOfMyDistrict = new MapGraph();
-        System.out.print("DONE. \nLoading the map...");
-        GraphLoader.loadRoadMap("data/maps/myDistrict_big.map", mapOfMyDistrict);
-        System.out.println("DONE.");
-
-        GeographicPoint startMy = new GeographicPoint(59.9305655, 30.4824903);
-        GeographicPoint endMy = new GeographicPoint(59.8980511, 30.4444886);
-
-        List<GeographicPoint> My_route_1 = mapOfMyDistrict.bfs(startMy, endMy);
-        List<GeographicPoint> My_route_2 = mapOfMyDistrict.dijkstra(startMy, endMy);
-        List<GeographicPoint> My_route_3 = mapOfMyDistrict.aStarSearch(startMy, endMy);
-        List<GeographicPoint> My_route_4 = mapOfMyDistrict.dijkstraByTime(startMy, endMy);
-        List<GeographicPoint> My_route_5 = mapOfMyDistrict.aStarSearchByTime(startMy, endMy);
-
-        System.out.println(
-                "Using BFS algorithm to find SHORTEST path" + "\t" + My_route_1.size() + "\n"
-                        +
-                        "Using Dijkstra algorithm to find SHORTEST path" + "\t" + My_route_2.size() + "\n"
-                        +
-                        "Using A-star algorithm to find SHORTEST path" + "\t" + My_route_3.size() + "\n"
-                        +
-                        "Using Dijkstra algorithm to find FASTER path" + "\t" + My_route_4.size() + "\n"
-                        +
-                        "Using A-star algorithm to find FASTER path" + "\t" + My_route_5.size()
-        );
-
-
     }
 
 }

@@ -109,7 +109,7 @@ public class RouteService {
             }
             //in case of allowed algorithms
             if (toggle == RouteController.DIJ || toggle == RouteController.A_STAR ||
-                    toggle == RouteController.BFS) {
+                    toggle == RouteController.BFS || toggle == RouteController.D_time) {
                 LOGGER.info("Start find path");
                 markerManager.initVisualization();
                 final Consumer<geography.GeographicPoint> nodeAccepter = markerManager.getVisualization()::acceptPoint;
@@ -120,6 +120,8 @@ public class RouteService {
                     path = mapGraph.bfs(start, end, nodeAccepter);
                 } else if (toggle == RouteController.DIJ) {
                     path = mapGraph.dijkstra(start, end, nodeAccepter);
+                } else if (toggle == RouteController.D_time) {
+                    path = mapGraph.dijkstraByTime(start, end, nodeAccepter);
                 } else {
                     path = mapGraph.aStarSearch(start, end, nodeAccepter);
                 }
