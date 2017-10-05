@@ -53,12 +53,12 @@ public class RouteVisualization {
 
         // create JavascriptArray of points
         points.forEach(geographicPoint -> {
-            LatLong ll = new LatLong(geographicPoint.getX(), geographicPoint.getY());
-            MarkerOptions options = MarkerManager.createDefaultOptions(ll);
+            LatLong latLong = new LatLong(geographicPoint.getX(), geographicPoint.getY());
+            MarkerOptions options = MarkerManager.createDefaultOptions(latLong);
             Marker newMarker = new Marker(options);
             jsArray.push(newMarker);
             markerList.add(newMarker);
-            bounds.extend(ll);
+            bounds.extend(latLong);
         });
 
         // fit map bounds to visualization

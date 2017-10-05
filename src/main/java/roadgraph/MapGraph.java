@@ -102,7 +102,7 @@ public class MapGraph {
     public boolean addVertex(final GeographicPoint location) {
         //Implemented this method in WEEK 2
         //add a distance for week 3 - set a distance to infinity
-        LOGGER.info("adding" + "\t" + location.toString());
+        LOGGER.fine("adding" + "\t" + location.toString());
         if (!listNodes.containsKey(location)) {
             MapNode mapNode = new MapNode(location, "");
             listNodes.put(location, mapNode);
@@ -201,7 +201,7 @@ public class MapGraph {
 
             //add an OUTCOMING edge from -> to
             listNodes.get(from).getListEdges().add(addedMapEdge);
-            LOGGER.info("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
+            LOGGER.fine("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
         }
     }
 
@@ -477,8 +477,8 @@ public class MapGraph {
         if (listNodes.containsKey(start) && listNodes.containsKey(goal)) {
             //initialize ADT
             //we should use a comparator!!!
-            final Comparator<MapNode> cmtr = createComparator();
-            final PriorityQueue<MapNode> pq = new PriorityQueue<>(5, cmtr);
+            final Comparator<MapNode> mapNodeComparator = createComparator();
+            final PriorityQueue<MapNode> mapNodePriorityQueue = new PriorityQueue<>(5, mapNodeComparator);
             final HashMap<MapNode, MapNode> parentMap = new HashMap<>();
             final Set<MapNode> visited = new HashSet<>();
             //set a distance for all nodes to infinity
@@ -490,11 +490,11 @@ public class MapGraph {
             //set a distance start node as 0
             startNode.setDistance(0.0);
             //start working with a PriorityQueue
-            pq.add(startNode);
+            mapNodePriorityQueue.add(startNode);
             //start a loop through PriorityQueue
             MapNode curr = null;
-            while (!pq.isEmpty()) {
-                curr = pq.poll();
+            while (!mapNodePriorityQueue.isEmpty()) {
+                curr = mapNodePriorityQueue.poll();
                 //--------------------------------------------
                 // hook for visualization
                 nodeSearched.accept(curr.getNodeLocation());
@@ -514,8 +514,8 @@ public class MapGraph {
                                 next.setDistance(curr.getDistance() + edgeLength);
                                 parentMap.put(next, curr);
                             }
-                            //enqueue into the pq
-                            pq.add(next);
+                            //enqueue into the mapNodePriorityQueue
+                            mapNodePriorityQueue.add(next);
                         }
                     }
                 }
@@ -562,10 +562,10 @@ public class MapGraph {
      * @return The list of intersections that form the shortest path from
      * start to goal (including both start and goal).
      */
-    public List<GeographicPoint> aStarSearch(GeographicPoint start,
-                                             GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
-        // TODO: Implement this method in WEEK 3
-        List<GeographicPoint> lfs = new LinkedList<>();
+    public List<GeographicPoint> aStarSearch(final GeographicPoint start,
+                                             final GeographicPoint goal, final Consumer<GeographicPoint> nodeSearched) {
+        //implemented this method in WEEK 3
+        List<GeographicPoint> lfs;
         if (listNodes.containsKey(start) && listNodes.containsKey(goal)) {
             //initialize ADT
             //we should use a comparator!!!
