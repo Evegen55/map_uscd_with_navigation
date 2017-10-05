@@ -8,6 +8,7 @@ public interface PathsToTheData {
     String UCSD_INTERSECTIONS = "data/intersections/ucsd1.intersections";
     String SIMPLETEST_MAP = "data/testdata/simpletest.map";
     String SIMPLETEST_INTERSECTIONS = "data/intersections/simpletest.intersections";
+    String CORRECT_ANSWER = "data/graders/mod3/map1.txt.answer";
 
     String ROUTES_UA = "data/airports/routesUA.dat";
     String MOD_1_GRADER = "data/graders/mod1/graph";
