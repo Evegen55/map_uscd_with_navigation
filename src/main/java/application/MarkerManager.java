@@ -31,10 +31,10 @@ public class MarkerManager {
     private HashMap<geography.GeographicPoint, Marker> markerMap;
     private ArrayList<geography.GeographicPoint> markerPositions;
     private GoogleMap map;
-    protected static String startURL = "http://maps.google.com/mapfiles/kml/pal3/icon40.png";
-    protected static String destinationURL = "http://maps.google.com/mapfiles/kml/pal2/icon5.png";
-    protected static String SELECTED_URL = "http://maps.google.com/mapfiles/kml/paddle/ltblu-circle.png";
-    protected static String markerURL = "http://maps.google.com/mapfiles/kml/paddle/blu-diamond-lv.png";
+    static String startURL = "http://maps.google.com/mapfiles/kml/pal3/icon40.png";
+    static String destinationURL = "http://maps.google.com/mapfiles/kml/pal2/icon5.png";
+    private static String SELECTED_URL = "http://maps.google.com/mapfiles/kml/paddle/ltblu-circle.png";
+    private static String markerURL = "http://maps.google.com/mapfiles/kml/paddle/blu-diamond-lv.png";
     protected static String visURL = "http://maps.google.com/mapfiles/kml/paddle/red-diamond-lv.png";
     private Marker startMarker;
     private Marker destinationMarker;
@@ -96,8 +96,8 @@ public class MarkerManager {
 
     }
 
-    /** Used to initialize new RouteVisualization object
-     *
+    /**
+     * Used to initialize new RouteVisualization object
      */
     public void initVisualization() {
         rv = new RouteVisualization(this);
@@ -146,15 +146,6 @@ public class MarkerManager {
      */
     public void restoreMarkers() {
         LOGGER.info("Start restoring markers");
-//    	Iterator<geography.GeographicPoint> it = markerMap.keySet().iterator();
-//        while(it.hasNext()) {
-//            Marker marker = markerMap.get(it.next());
-//            // destination marker needs to be added because it is added in javascript
-//            if(marker != startMarker) {
-//                marker.setVisible(false);
-//                marker.setVisible(true);
-//            }
-//        }
         markerMap.keySet().forEach(geographicPoint -> {
             final Marker marker = markerMap.get(geographicPoint);
             // destination marker needs to be added because it is added in javascript
@@ -163,13 +154,12 @@ public class MarkerManager {
                 marker.setVisible(true);
             }
         });
-
         selectManager.resetSelect();
         LOGGER.info("End restoring markers");
     }
 
     public void refreshMarkers() {
-
+        // TODO: 10/5/2017 Java8 style
         Iterator<geography.GeographicPoint> it = markerMap.keySet().iterator();
         while (it.hasNext()) {
             Marker marker = markerMap.get(it.next());
@@ -178,14 +168,15 @@ public class MarkerManager {
     }
 
     public void clearMarkers() {
+        LOGGER.info("Start clear markers");
         if (rv != null) {
             rv.clearMarkers();
             rv = null;
         }
-        Iterator<geography.GeographicPoint> it = markerMap.keySet().iterator();
-        while (it.hasNext()) {
-            markerMap.get(it.next()).setVisible(false);
-        }
+        markerMap.keySet()
+                .forEach(geographicPoint -> markerMap.get(geographicPoint).setVisible(false));
+
+        LOGGER.info("End clear markers");
     }
 
     public void setSelectMode(boolean value) {
@@ -209,15 +200,19 @@ public class MarkerManager {
         return markerOptions;
     }
 
+    /**
+     *
+     */
     public void hideIntermediateMarkers() {
-        Iterator<geography.GeographicPoint> it = markerMap.keySet().iterator();
-        while (it.hasNext()) {
-            Marker marker = markerMap.get(it.next());
+        LOGGER.info("Start hide intermediate markers");
+        markerMap.keySet().forEach(geographicPoint -> {
+            final Marker marker = markerMap.get(geographicPoint);
+            // destination marker needs to be added because it is added in javascript
             if (marker != startMarker && marker != destinationMarker) {
                 marker.setVisible(false);
             }
-//        	map.addMarker(marker);
-        }
+        });
+        LOGGER.info("End hide intermediate markers");
     }
 
     public void hideDestinationMarker() {
@@ -234,41 +229,42 @@ public class MarkerManager {
         }
     }
 
-    public void displayDataSet() {
-        markerPositions = new ArrayList<geography.GeographicPoint>();
+    void displayDataSet() {
+        LOGGER.info("Start of display Intersections");
+        markerPositions = new ArrayList<>();
         dataSet.initializeGraph();
-        Iterator<geography.GeographicPoint> it = dataSet.getIntersections().iterator();
         bounds = new LatLongBounds();
-        while (it.hasNext()) {
-            geography.GeographicPoint point = it.next();
-            LatLong ll = new LatLong(point.getX(), point.getY());
+
+        dataSet.getIntersections().forEach(geographicPoint -> {
+            LatLong ll = new LatLong(geographicPoint.getX(), geographicPoint.getY());
             MarkerOptions markerOptions = createDefaultOptions(ll);
             bounds.extend(ll);
             Marker marker = new Marker(markerOptions);
-            registerEvents(marker, point);
+            registerEvents(marker, geographicPoint);
             map.addMarker(marker);
-            putMarker(point, marker);
-            markerPositions.add(point);
+            putMarker(geographicPoint, marker);
+            markerPositions.add(geographicPoint);
 //            marker.setZIndex(DEFAULT_Z);
-        }
+        });
+
         map.fitBounds(bounds);
-        // System.out.println("End of display Intersections");
+        LOGGER.info("End of display Intersections");
 
     }
 
 
-    private void registerEvents(Marker marker, geography.GeographicPoint point) {
-        /*map.addUIEventHandler(marker, UIEventType.mouseover, (JSObject o) -> {
-           marker.setVisible(true);
-           //marker.setAnimation(Animation.BOUNCE);
-        });
-
-        map.addUIEventHandler(marker, UIEventType.mouseout, (JSObject o) -> {
-        	marker.setAnimation(null);
-        });*/
+    private void registerEvents(final Marker marker, final geography.GeographicPoint point) {
+//        map.addUIEventHandler(marker, UIEventType.mouseover, (JSObject o) -> {
+//           marker.setVisible(true);
+//           //marker.setAnimation(Animation.BOUNCE);
+//        });
+//
+//        map.addUIEventHandler(marker, UIEventType.mouseout, (JSObject o) -> {
+//        	marker.setAnimation(null);
+//        });
 
         map.addUIEventHandler(marker, UIEventType.click, (JSObject o) -> {
-            //System.out.println("Clicked Marker : " + point.toString());
+            LOGGER.info("Clicked Marker : " + point.toString());
             if (selectMode) {
                 if (selectedMarker != null && selectedMarker != startMarker
                         && selectedMarker != destinationMarker) {
