@@ -52,14 +52,6 @@ public class RouteVisualization {
 //    	manager.disableRouteButtons(true);
 
         // create JavascriptArray of points
-//        for (geography.GeographicPoint point : points) {
-//            LatLong ll = new LatLong(point.getX(), point.getY());
-//            MarkerOptions options = MarkerManager.createDefaultOptions(ll);
-//            Marker newMarker = new Marker(options);
-//            jsArray.push(newMarker);
-//            markerList.add(newMarker);
-//            bounds.extend(ll);
-//        }
         points.forEach(geographicPoint -> {
             LatLong ll = new LatLong(geographicPoint.getX(), geographicPoint.getY());
             MarkerOptions options = MarkerManager.createDefaultOptions(ll);
