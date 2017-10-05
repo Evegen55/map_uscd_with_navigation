@@ -15,11 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.util.Callback;
 import util.PathsToTheData;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
@@ -37,6 +33,11 @@ public class FetchController {
     private ComboBox<DataSet> dataChoices;
     // maybe choice map
     private TextField writeFile;
+
+    //it depend on your hardware
+    // TODO: 10/5/2017 calculate it in an appropriate style
+    private static final double LIMIT_TOTAL_ERROR = 0.5;
+    private static final double LIMIT_WARNING_ERROR = 0.02;
 
     public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
                            Button fetchButton, ComboBox<DataSet> dataSetComboBox, Button displayButton) {
@@ -117,13 +118,13 @@ public class FetchController {
 
             // check for valid file name ___.map or mapfiles/___.map
             if ((generalService.checkDataFileName(fName)) != null) {
-                if (!generalService.checkBoundsSize(.1)) {
+                if (!generalService.checkBoundsSize(LIMIT_TOTAL_ERROR)) {
                     Alert alert = new Alert(AlertType.ERROR);
                     alert.setTitle("Size Error");
                     alert.setHeaderText("Map Size Error");
                     alert.setContentText("Map boundaries are too large.");
                     alert.showAndWait();
-                } else if (!generalService.checkBoundsSize(0.02)) {
+                } else if (!generalService.checkBoundsSize(LIMIT_WARNING_ERROR)) {
                     Alert warning = new Alert(AlertType.CONFIRMATION);
                     warning.setTitle("Size Warning");
                     warning.setHeaderText("Map Size Warning");
