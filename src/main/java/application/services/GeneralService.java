@@ -30,7 +30,7 @@ public class GeneralService {
 
     private final static Logger LOGGER = Logger.getLogger(GeneralService.class.getName());
     private static final String DATA_FILE_PATTERN = "[\\w_]+.map";
-    static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
     //	private static boolean singleton = false;
     private int currentState;

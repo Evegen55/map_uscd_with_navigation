@@ -37,8 +37,6 @@ public class FetchController {
     private ComboBox<DataSet> dataChoices;
     // maybe choice map
     private TextField writeFile;
-    private String filename = "data.map";
-
 
     public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
                            Button fetchButton, ComboBox<DataSet> dataSetComboBox, Button displayButton) {
