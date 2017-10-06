@@ -4,13 +4,13 @@ import application.MapApp;
 import application.MarkerManager;
 import application.RouteVisualization;
 import application.controllers.RouteController;
-import gmapsfx.GoogleMapView;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.LatLongBounds;
-import gmapsfx.javascript.object.MVCArray;
-import gmapsfx.shapes.Polyline;
-import gmapsfx.shapes.PolylineOptions;
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.LatLongBounds;
+import com.lynden.gmapsfx.javascript.object.MVCArray;
+import com.lynden.gmapsfx.shapes.Polyline;
+import com.lynden.gmapsfx.shapes.PolylineOptions;
 import roadgraph.MapGraph;
 
 import java.util.ArrayList;
@@ -58,7 +58,8 @@ public class RouteService {
         LatLongBounds bounds = new LatLongBounds();
         for (LatLong point : route) {
             path.push(point);
-            bounds = bounds.extend(point);
+//            bounds = bounds.extend(point);
+            bounds.extend(point);
         }
 
         //use PolylineOptions to manage color instead empty constructor

@@ -6,8 +6,8 @@
 
 package application;
 
+import com.lynden.gmapsfx.javascript.object.Marker;
 import geography.GeographicPoint;
-import gmapsfx.javascript.object.Marker;
 
 import java.util.logging.Logger;
 

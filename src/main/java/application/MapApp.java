@@ -11,12 +11,12 @@ import application.controllers.FetchController;
 import application.controllers.RouteController;
 import application.services.GeneralService;
 import application.services.RouteService;
-import gmapsfx.GoogleMapView;
-import gmapsfx.MapComponentInitializedListener;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.MapOptions;
-import gmapsfx.javascript.object.MapTypeIdEnum;
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.MapComponentInitializedListener;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.MapOptions;
+import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -43,18 +43,19 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.AlgorithmsTypes;
 import util.PathsToTheData;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 
 public class MapApp extends Application implements MapComponentInitializedListener {
 
-    private final static Logger LOGGER = Logger.getLogger(MapApp.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapApp.class);
 
     private GoogleMapView mapComponent;
     protected GoogleMap map;
@@ -81,7 +82,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
 
         // set up map
         mapComponent = new GoogleMapView();
-        mapComponent.addMapInitializedListener(this);
+        mapComponent.addMapInializedListener(this);
 
         // initialize tabs for data fetching and route controls
         final Tab routeTab = new Tab("Routing");
@@ -186,7 +187,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
                 .zoomControl(true);
         // create map;
         map = mapComponent.createMap(options);
-        setupJSAlerts(mapComponent.getWebView());
+        setupJSAlerts(mapComponent.getWebview());
         LOGGER.info("Map initialized successfully");
     }
 

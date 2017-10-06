@@ -6,13 +6,13 @@
 
 package application;
 
-import gmapsfx.javascript.IJavascriptRuntime;
-import gmapsfx.javascript.JavascriptArray;
-import gmapsfx.javascript.JavascriptRuntime;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.LatLongBounds;
-import gmapsfx.javascript.object.Marker;
-import gmapsfx.javascript.object.MarkerOptions;
+import com.lynden.gmapsfx.javascript.IJavascriptRuntime;
+import com.lynden.gmapsfx.javascript.JavascriptArray;
+import com.lynden.gmapsfx.javascript.JavascriptRuntime;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.LatLongBounds;
+import com.lynden.gmapsfx.javascript.object.Marker;
+import com.lynden.gmapsfx.javascript.object.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;

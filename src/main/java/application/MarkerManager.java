@@ -6,12 +6,13 @@
 
 package application;
 
-import gmapsfx.javascript.event.UIEventType;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.LatLongBounds;
-import gmapsfx.javascript.object.Marker;
-import gmapsfx.javascript.object.MarkerOptions;
+
+import com.lynden.gmapsfx.javascript.event.UIEventType;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.LatLongBounds;
+import com.lynden.gmapsfx.javascript.object.Marker;
+import com.lynden.gmapsfx.javascript.object.MarkerOptions;
 import javafx.scene.control.Button;
 import netscape.javascript.JSObject;
 
@@ -127,7 +128,7 @@ public class MarkerManager {
 
     public void setDestination(geography.GeographicPoint point) {
         if (destinationMarker != null) {
-            destinationMarker.setIcon(markerURL);
+            changeIcon(destinationMarker, markerURL);
 //            destinationMarker.setZIndex(DEFAULT_Z);
         }
         destinationMarker = markerMap.get(point);
@@ -137,7 +138,9 @@ public class MarkerManager {
 
     public void changeIcon(Marker marker, String url) {
         marker.setVisible(false);
-        marker.setIcon(url);
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.icon(url);
+        marker.setOptions(markerOptions);
         marker.setVisible(true);
     }
 
@@ -270,12 +273,12 @@ public class MarkerManager {
             if (selectMode) {
                 if (selectedMarker != null && selectedMarker != startMarker
                         && selectedMarker != destinationMarker) {
-                    selectedMarker.setIcon(markerURL);
+                    changeIcon(selectedMarker, markerURL);
 //                		selectedMarker.setZIndex(DEFAULT_Z);
                 }
                 selectManager.setPoint(point, marker);
                 selectedMarker = marker;
-                selectedMarker.setIcon(SELECTED_URL);
+                changeIcon(selectedMarker, SELECTED_URL);
 //                selectedMarker.setZIndex(SELECT_Z);
 
                 // re add markers to map
