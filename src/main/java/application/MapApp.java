@@ -52,8 +52,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 
-public class MapApp extends Application
-        implements MapComponentInitializedListener {
+public class MapApp extends Application implements MapComponentInitializedListener {
 
     private final static Logger LOGGER = Logger.getLogger(MapApp.class.getName());
 
