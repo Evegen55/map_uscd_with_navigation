@@ -7,7 +7,7 @@ public interface PathsToTheData {
 
     String DATA_FILE_DIR_STR = "src/test/resources/data/maps/";
     // path for mapfiles to load when program starts
-    String PERSIST_PATH = "src/test/resources/data/maps/mapfiles.list";
+    String PERSIST_PATH_FOR_TESTS = "src/test/resources/data/maps/mapfiles.list";
 
     String UCSD_MAP = "src/test/resources/data/maps/ucsd.map";
     String UCSD_INTERSECTIONS = "src/test/resources/data/intersections/ucsd1.intersections";

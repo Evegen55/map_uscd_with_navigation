@@ -68,7 +68,7 @@ public class FetchController {
      */
     private void loadDataSets(final Stage primaryStage) {
         try {
-            readFileWithListOfMaps(PathsToTheData.PERSIST_PATH);
+            readFileWithListOfMaps(PathsToTheData.PERSIST_PATH_FOR_TESTS);
         } catch (IOException e) {
             LOGGER.warning("No existing map files found.");
             pickListFileInsideFolderWithMaps(primaryStage);

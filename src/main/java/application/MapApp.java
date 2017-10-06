@@ -56,10 +56,10 @@ public class MapApp extends Application implements MapComponentInitializedListen
 
     private final static Logger LOGGER = Logger.getLogger(MapApp.class.getName());
 
-    protected GoogleMapView mapComponent;
+    private GoogleMapView mapComponent;
     protected GoogleMap map;
-    protected BorderPane bp;
-    protected Stage primaryStage;
+    private BorderPane bp;
+    private Stage primaryStage;
 
     // CONSTANTS
     private static final double MARGIN_VAL = 10;
@@ -168,7 +168,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
 
     @Override
     public void mapInitialized() {
-        LOGGER.info("Map initializing");
+        LOGGER.info("Map initializing...");
         final LatLong center = new LatLong(32.8810, -117.2380);
         // set map options
         final MapOptions options = new MapOptions();
@@ -187,6 +187,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
         // create map;
         map = mapComponent.createMap(options);
         setupJSAlerts(mapComponent.getWebView());
+        LOGGER.info("Map initialized successfully");
     }
 
 
