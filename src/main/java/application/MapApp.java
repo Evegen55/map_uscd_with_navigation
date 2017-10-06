@@ -152,7 +152,7 @@ public class MapApp extends Application
             LOGGER.info("initialize controllers");
             new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
                     startLabel, endLabel, pointLabel, manager, markerManager);
-            new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton);
+            new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton, primaryStage);
         });
 
         LOGGER.info("Add components to border pane");

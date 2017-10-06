@@ -12,9 +12,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import util.PathsToTheData;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,34 +42,51 @@ public class FetchController {
     private static final double LIMIT_TOTAL_ERROR = 0.5;
     private static final double LIMIT_WARNING_ERROR = 0.02;
 
-    public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
-                           Button fetchButton, ComboBox<DataSet> dataSetComboBox, Button displayButton) {
+    public FetchController(final GeneralService generalService, final RouteService routeService, final TextField writeFile,
+                           final Button fetchButton, ComboBox<DataSet> dataSetComboBox, final Button displayButton, Stage primaryStage) {
         this.generalService = generalService;
         this.routeService = routeService;
         this.fetchButton = fetchButton;
         this.displayButton = displayButton;
         this.writeFile = writeFile;
-        dataChoices = dataSetComboBox;
+        this.dataChoices = dataSetComboBox;
         setupComboCells();
         setupFetchButton();
         setupDisplayButton();
-        loadDataSets();
+        loadDataSets(primaryStage);
 
     }
 
-    private void loadDataSets() {
+    private void loadDataSets(Stage primaryStage) {
         try {
-            Files.lines(Paths.get(PathsToTheData.PERSIST_PATH)).forEach(line -> {
-                LOGGER.fine(line);
-                final String path = GeneralService.getDataSetDirectory() + line;
-                LOGGER.fine(path);
-                dataChoices.getItems().add(new DataSet(path));
-            });
+            readFileWithListOfMaps(PathsToTheData.PERSIST_PATH);
         } catch (IOException e) {
             LOGGER.warning("No existing map files found.");
-            // TODO: 10/5/2017 use file chooser in this case
-            e.printStackTrace();
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Find a file with extension .list");
+            final File openDialogFile = fileChooser.showOpenDialog(primaryStage);
+            if (openDialogFile != null) {
+                final String openDialogFilePath = openDialogFile.getPath();
+                System.out.println(openDialogFilePath);
+                try {
+                    readFileWithListOfMaps(openDialogFilePath);
+                } catch (IOException e1) {
+                    LOGGER.warning("First exception");
+                    e.printStackTrace();
+                    LOGGER.warning("Second exception");
+                    e1.printStackTrace();
+                }
+            }
         }
+    }
+
+    private void readFileWithListOfMaps(final String fileName) throws IOException {
+        Files.lines(Paths.get(fileName)).forEach(line -> {
+            LOGGER.fine(line);
+            final String path = GeneralService.getDataSetDirectory() + line;
+            LOGGER.fine(path);
+            dataChoices.getItems().add(new DataSet(path));
+        });
     }
 
     private void setupComboCells() {
