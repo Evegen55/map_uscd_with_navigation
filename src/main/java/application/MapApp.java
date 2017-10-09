@@ -52,7 +52,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-
+/**
+ * cmd parameter "enable_vis" enables visualisation button
+ */
 public class MapApp extends Application implements MapComponentInitializedListener {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MapApp.class);
@@ -65,6 +67,11 @@ public class MapApp extends Application implements MapComponentInitializedListen
     // CONSTANTS
     private static final double MARGIN_VAL = 10;
     private static final double FETCH_COMPONENT_WIDTH = 160.0;
+
+    private static String paramToStartWithCustomFile = "enable_vis";
+    private static final String MAP_RESOURCE_PATH = "/html/index.html";
+    private static boolean visualisation_enabled = false;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -81,6 +88,12 @@ public class MapApp extends Application implements MapComponentInitializedListen
         bp = new BorderPane();
 
         // set up map
+        if (isParamToVisualise()) {
+            LOGGER.warn("Application will use custom file" + "\t" + MAP_RESOURCE_PATH);
+            // TODO: 10/9/2017 why the function visualizeSearch(mapParam, markersParam) is not founded??
+            mapComponent = new GoogleMapView(MAP_RESOURCE_PATH);
+            visualisation_enabled = true;
+        }
         mapComponent = new GoogleMapView();
         mapComponent.addMapInializedListener(this);
 
@@ -130,6 +143,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
         final MarkerManager markerManager = new MarkerManager();
         markerManager.setSelectManager(manager);
         manager.setMarkerManager(markerManager);
+        // TODO: 10/9/2017 move it into setupRouteTab method
         markerManager.setVisButton(visualizationButton);
 
         LOGGER.info(" create components for route tab");
@@ -164,6 +178,20 @@ public class MapApp extends Application implements MapComponentInitializedListen
         scene.getStylesheets().add(PathsToTheData.HTML_ROUTING_CSS);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private boolean isParamToVisualise() {
+        LOGGER.info("Retrieving list of params ... ");
+        final List<String> stringList = this.getParameters().getRaw();
+        if (!stringList.isEmpty()) {
+            LOGGER.info("List of params is not empty");
+            final String paramRunWithVis = stringList.get(0);
+            if (paramRunWithVis != null && paramRunWithVis.equals(paramToStartWithCustomFile)) {
+                LOGGER.info("Param to start visualisation: " + paramRunWithVis);
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -240,15 +268,15 @@ public class MapApp extends Application implements MapComponentInitializedListen
      * @param showButton
      * @param hideButton
      * @param resetButton
-     * @param vButton
+     * @param visButton
      * @param startButton
      * @param destButton
      * @param searchOptions
      */
-    private void setupRouteTab(final Tab routeTab, final VBox fetchBox, final Label startLabel, final Label endLabel, final Label pointLabel,
-                               final Button showButton, final Button hideButton, final Button resetButton, final Button vButton,
-                               final Button startButton,
-                               final Button destButton, final List<RadioButton> searchOptions) {
+    private static void setupRouteTab(final Tab routeTab, final VBox fetchBox, final Label startLabel, final Label endLabel, final Label pointLabel,
+                                      final Button showButton, final Button hideButton, final Button resetButton, final Button visButton,
+                                      final Button startButton,
+                                      final Button destButton, final List<RadioButton> searchOptions) {
 
         //set up tab layout
         final HBox h = new HBox();
@@ -292,10 +320,12 @@ public class MapApp extends Application implements MapComponentInitializedListen
         for (RadioButton rb : searchOptions) {
             v.getChildren().add(rb);
         }
-        v.getChildren().add(vButton);
+        if (visualisation_enabled) {
+            v.getChildren().add(visButton);
+        }
         VBox.setMargin(showHideBox, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
-        VBox.setMargin(vButton, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
-        vButton.setDisable(true);
+        VBox.setMargin(visButton, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
+        visButton.setDisable(true);
         v.getChildren().add(markerBox);
 //        v.getChildren().add(resetButton);
         routeTab.setContent(h);
@@ -317,7 +347,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
         });
     }
 
-    private LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
+    private static LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
 
         // Use Dijkstra as default
         final RadioButton rbD = new RadioButton(AlgorithmsTypes.DIJKSTRA.toString());
