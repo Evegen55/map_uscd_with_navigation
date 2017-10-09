@@ -1,9 +1,9 @@
 package application.services;
 
-import application.DataSet;
+import application.entities.DataSet;
 import application.MapApp;
-import application.MarkerManager;
-import application.SelectManager;
+import application.business.MarkerManager;
+import application.business.SelectManager;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.javascript.object.GoogleMap;
 import com.lynden.gmapsfx.javascript.object.LatLong;

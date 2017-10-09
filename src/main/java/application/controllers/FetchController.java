@@ -1,6 +1,6 @@
 package application.controllers;
 
-import application.DataSet;
+import application.entities.DataSet;
 import application.services.GeneralService;
 import application.services.RouteService;
 import javafx.scene.Node;

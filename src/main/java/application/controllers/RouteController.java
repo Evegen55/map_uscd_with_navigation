@@ -1,9 +1,9 @@
 package application.controllers;
 
-import application.CLabel;
+import application.entities.CLabel;
 import application.MapApp;
-import application.MarkerManager;
-import application.SelectManager;
+import application.business.MarkerManager;
+import application.business.SelectManager;
 import application.services.RouteService;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;

@@ -1,8 +1,8 @@
 package application.services;
 
 import application.MapApp;
-import application.MarkerManager;
-import application.RouteVisualization;
+import application.business.MarkerManager;
+import application.business.RouteVisualization;
 import application.controllers.RouteController;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.javascript.object.GoogleMap;

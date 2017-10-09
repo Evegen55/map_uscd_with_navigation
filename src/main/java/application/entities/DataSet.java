@@ -1,4 +1,4 @@
-package application;
+package application.entities;
 
 import geography.GeographicPoint;
 import util.GraphLoader;

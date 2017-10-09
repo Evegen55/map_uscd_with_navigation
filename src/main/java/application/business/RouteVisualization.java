@@ -4,7 +4,7 @@
  * @author UCSD MOOC development team
  */
 
-package application;
+package application.business;
 
 import com.lynden.gmapsfx.javascript.IJavascriptRuntime;
 import com.lynden.gmapsfx.javascript.JavascriptArray;

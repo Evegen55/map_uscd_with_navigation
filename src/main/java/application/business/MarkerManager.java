@@ -4,9 +4,10 @@
  * @author UCSD MOOC development team
  */
 
-package application;
+package application.business;
 
 
+import application.entities.DataSet;
 import com.lynden.gmapsfx.javascript.event.UIEventType;
 import com.lynden.gmapsfx.javascript.object.GoogleMap;
 import com.lynden.gmapsfx.javascript.object.LatLong;
@@ -32,8 +33,8 @@ public class MarkerManager {
     private HashMap<geography.GeographicPoint, Marker> markerMap;
     private ArrayList<geography.GeographicPoint> markerPositions;
     private GoogleMap map;
-    static String startURL = "http://maps.google.com/mapfiles/kml/pal3/icon40.png";
-    static String destinationURL = "http://maps.google.com/mapfiles/kml/pal2/icon5.png";
+    public static String startURL = "http://maps.google.com/mapfiles/kml/pal3/icon40.png";
+    public static String destinationURL = "http://maps.google.com/mapfiles/kml/pal2/icon5.png";
     private static String SELECTED_URL = "http://maps.google.com/mapfiles/kml/paddle/ltblu-circle.png";
     private static String markerURL = "http://maps.google.com/mapfiles/kml/paddle/blu-diamond-lv.png";
     protected static String visURL = "http://maps.google.com/mapfiles/kml/paddle/red-diamond-lv.png";

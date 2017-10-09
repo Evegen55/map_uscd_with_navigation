@@ -7,8 +7,12 @@
  */
 package application;
 
+import application.business.MarkerManager;
+import application.business.SelectManager;
 import application.controllers.FetchController;
 import application.controllers.RouteController;
+import application.entities.CLabel;
+import application.entities.DataSet;
 import application.services.GeneralService;
 import application.services.RouteService;
 import com.lynden.gmapsfx.GoogleMapView;
@@ -17,6 +21,7 @@ import com.lynden.gmapsfx.javascript.object.GoogleMap;
 import com.lynden.gmapsfx.javascript.object.LatLong;
 import com.lynden.gmapsfx.javascript.object.MapOptions;
 import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
+import geography.GeographicPoint;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -121,7 +126,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
         final Image sImage = new Image(MarkerManager.startURL);
         final Image dImage = new Image(MarkerManager.destinationURL);
         LOGGER.info("create empty start and end points");
-        final CLabel<geography.GeographicPoint> startLabel = new CLabel<>("Empty.", new ImageView(sImage), null);
+        final CLabel<GeographicPoint> startLabel = new CLabel<>("Empty.", new ImageView(sImage), null);
         final CLabel<geography.GeographicPoint> endLabel = new CLabel<>("Empty.", new ImageView(dImage), null);
         //TODO -- hot fix
         startLabel.setMinWidth(180);

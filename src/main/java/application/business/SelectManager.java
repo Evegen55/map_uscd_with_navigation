@@ -4,8 +4,10 @@
  * @author UCSD MOOC development team
  */
 
-package application;
+package application.business;
 
+import application.entities.CLabel;
+import application.entities.DataSet;
 import com.lynden.gmapsfx.javascript.object.Marker;
 import geography.GeographicPoint;
 
