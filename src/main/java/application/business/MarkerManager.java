@@ -16,15 +16,17 @@ import com.lynden.gmapsfx.javascript.object.Marker;
 import com.lynden.gmapsfx.javascript.object.MarkerOptions;
 import javafx.scene.control.Button;
 import netscape.javascript.JSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
+
 
 public class MarkerManager {
 
-    private final static Logger LOGGER = Logger.getLogger(MarkerManager.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(MarkerManager.class);
 
     private static final double DEFAULT_Z = 2;
     private static final double SELECT_Z = 1;
@@ -49,17 +51,11 @@ public class MarkerManager {
     private boolean selectMode = true;
 
     public MarkerManager() {
-        markerMap = new HashMap<geography.GeographicPoint, Marker>();
+        markerMap = new HashMap<>();
         this.map = null;
         this.selectManager = null;
         this.rv = null;
         markerPositions = null;
-    }
-
-    public MarkerManager(GoogleMap map, SelectManager selectManager) {
-        // TODO -- parameters?
-        dataSet = null;
-
     }
 
     /**
