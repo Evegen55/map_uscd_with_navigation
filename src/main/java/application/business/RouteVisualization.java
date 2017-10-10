@@ -40,7 +40,7 @@ public class RouteVisualization {
 
     public void acceptPoint(geography.GeographicPoint point) {
         points.add(point);
-        ////LOGGER.debug("accepted point : " + point);
+        LOGGER.debug("accepted point : " + point);
     }
 
     public void startVisualization() {
@@ -68,7 +68,7 @@ public class RouteVisualization {
         // get javascript runtime and execute animation
         runtime = JavascriptRuntime.getInstance();
         String command = runtime.getFunction("visualizeSearch", manager.getMap(), jsArray);
-        ////LOGGER.debug(command);
+        LOGGER.debug(command);
         runtime.execute(command);
 //    	MapApp.showInfoAlert("Nodes visited :"  , latLongs.size() +" nodes were visited in the search");
         manager.disableVisButton(true);

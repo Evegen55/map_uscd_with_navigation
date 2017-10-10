@@ -102,7 +102,7 @@ public class MapGraph {
     public boolean addVertex(final GeographicPoint location) {
         //Implemented this method in WEEK 2
         //add a distance for week 3 - set a distance to infinity
-        ////LOGGER.debug("adding" + "\t" + location.toString());
+        LOGGER.debug("adding" + "\t" + location.toString());
         if (!listNodes.containsKey(location)) {
             MapNode mapNode = new MapNode(location, "");
             listNodes.put(location, mapNode);
@@ -201,7 +201,7 @@ public class MapGraph {
 
             //add an OUTCOMING edge from -> to
             listNodes.get(from).getListEdges().add(addedMapEdge);
-            ////LOGGER.debug("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
+            LOGGER.debug("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
         }
     }
 
@@ -589,7 +589,7 @@ public class MapGraph {
                             double edgeLength = getLengthEdgeBeetwen(current, neighbour);
                             if ((current.getDistance() + edgeLength < neighbour.getDistance())
                                     && getReducedCost(current.getNodeLocation(), goal) <= redCost) {
-                                ////LOGGER.debug("" + getReducedCost(current.getNodeLocation(), goal));
+                                LOGGER.debug("" + getReducedCost(current.getNodeLocation(), goal));
                                 //update neighbour's distance
                                 neighbour.setDistance(current.getDistance() + edgeLength);
                                 parentMap.put(neighbour, current);
@@ -679,7 +679,7 @@ public class MapGraph {
                         if (!visited.contains(next)) {
                             //if path through current to n is faster ->
                             double timeToNextNode = getTimeBetweenNodes(current, next);
-                            ////LOGGER.debug("timeToNextNode" + "\t" + timeToNextNode);
+                            LOGGER.debug("timeToNextNode" + "\t" + timeToNextNode);
                             if (current.getTime() + timeToNextNode < next.getTime()) {
                                 //update next's speed Limit
                                 next.setTime(current.getTime() + timeToNextNode);
@@ -694,7 +694,7 @@ public class MapGraph {
             }
             //it just because we havent got the full road map in some cases
             if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
-                //LOGGER.debug("No path found from " + start + " to " + goal);
+                LOGGER.debug("No path found from " + start + " to " + goal);
                 return null;
             }
 
