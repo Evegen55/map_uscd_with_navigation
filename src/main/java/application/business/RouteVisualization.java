@@ -13,17 +13,19 @@ import com.lynden.gmapsfx.javascript.object.LatLong;
 import com.lynden.gmapsfx.javascript.object.LatLongBounds;
 import com.lynden.gmapsfx.javascript.object.Marker;
 import com.lynden.gmapsfx.javascript.object.MarkerOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 /**
  * It uses the JavaScript function to show the animation
  */
 public class RouteVisualization {
 
-    private final static Logger LOGGER = Logger.getLogger(RouteVisualization.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RouteVisualization.class);
 
     private List<geography.GeographicPoint> points;
     private ArrayList<Marker> markerList;
@@ -38,7 +40,7 @@ public class RouteVisualization {
 
     public void acceptPoint(geography.GeographicPoint point) {
         points.add(point);
-        LOGGER.fine("accepted point : " + point);
+        ////LOGGER.debug("accepted point : " + point);
     }
 
     public void startVisualization() {
@@ -66,7 +68,7 @@ public class RouteVisualization {
         // get javascript runtime and execute animation
         runtime = JavascriptRuntime.getInstance();
         String command = runtime.getFunction("visualizeSearch", manager.getMap(), jsArray);
-        LOGGER.fine(command);
+        ////LOGGER.debug(command);
         runtime.execute(command);
 //    	MapApp.showInfoAlert("Nodes visited :"  , latLongs.size() +" nodes were visited in the search");
         manager.disableVisButton(true);

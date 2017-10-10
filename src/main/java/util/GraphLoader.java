@@ -9,14 +9,14 @@ package util;
 import basicgraph.Graph;
 import geography.GeographicPoint;
 import geography.RoadSegment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import roadgraph.MapGraph;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,14 +24,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class GraphLoader {
 
-    private final static Logger LOGGER = Logger.getLogger(GraphLoader.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(GraphLoader.class);
 
     /**
      * * The file contains data lines as follows:
@@ -509,8 +508,8 @@ public class GraphLoader {
     // are lists of length two where each entry in the list is a list.
     // The first list stores the outgoing roads while the second
     // stores the outgoing roads.
-    private static HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>>  buildPointMapOneWay(final String filename) {
-        HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap =  new HashMap<>();
+    private static HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> buildPointMapOneWay(final String filename) {
+        HashMap<GeographicPoint, List<LinkedList<RoadLineInfo>>> pointMap = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String nextLine;
             // Read the lines out of the file and put them in a HashMap by points
@@ -519,7 +518,7 @@ public class GraphLoader {
                 addToPointsMapOneWay(line, pointMap);
             }
         } catch (IOException e) {
-            LOGGER.warning("Problem loading dictionary file: " + filename);
+            LOGGER.error("Problem loading dictionary file: " + filename);
             e.printStackTrace();
         }
         return pointMap;

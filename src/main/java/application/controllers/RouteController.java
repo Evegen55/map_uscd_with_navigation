@@ -1,22 +1,23 @@
 package application.controllers;
 
-import application.entities.CLabel;
 import application.MapApp;
 import application.business.MarkerManager;
 import application.business.SelectManager;
+import application.entities.CLabel;
 import application.services.RouteService;
 import geography.GeographicPoint;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.AlgorithmsTypes;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class RouteController {
 
-    private final static Logger LOGGER = Logger.getLogger(RouteController.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RouteController.class);
 
     // Strings for slider labels
     public static final int DIJ = 1;
@@ -111,7 +112,7 @@ public class RouteController {
             } else if (group.getSelectedToggle().getUserData().equals(AlgorithmsTypes.D_TIME)) {
                 selectedToggle = D_time;
             } else {
-                LOGGER.warning("Invalid radio button selection");
+                LOGGER.error("Invalid radio button selection");
             }
         });
     }

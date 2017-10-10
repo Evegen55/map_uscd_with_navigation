@@ -1,9 +1,9 @@
 package application.services;
 
-import application.entities.DataSet;
 import application.MapApp;
 import application.business.MarkerManager;
 import application.business.SelectManager;
+import application.entities.DataSet;
 import com.lynden.gmapsfx.GoogleMapView;
 import com.lynden.gmapsfx.javascript.object.GoogleMap;
 import com.lynden.gmapsfx.javascript.object.LatLong;
@@ -13,13 +13,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import mapmaker.MapMaker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.PathsToTheData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public class GeneralService {
 
-    private final static Logger LOGGER = Logger.getLogger(GeneralService.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(GeneralService.class);
     private static final String DATA_FILE_PATTERN = "[\\w_]+.map";
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
@@ -94,7 +95,7 @@ public class GeneralService {
     public void displayIntersections(DataSet dataset) {
         // remove old data set markers
         if (markerManager == null) {
-            LOGGER.warning("failure!");
+            LOGGER.error("failure!");
         }
         if (markerManager.getDataSet() != null) {
             markerManager.clearMarkers();
@@ -166,7 +167,7 @@ public class GeneralService {
                 LOGGER.info("Fetch Task Succeeded");
 
             } else {
-                LOGGER.warning("Something went wrong, data not written to file : Task succeeded but fileName returned differently");
+                LOGGER.error("Something went wrong, data not written to file : Task succeeded but fileName returned differently");
 
             }
             button.setDisable(false);

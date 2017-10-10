@@ -12,6 +12,8 @@ import com.lynden.gmapsfx.javascript.object.MVCArray;
 import com.lynden.gmapsfx.shapes.Polyline;
 import com.lynden.gmapsfx.shapes.PolylineOptions;
 import geography.GeographicPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import roadgraph.MapGraph;
 
 import java.util.ArrayList;
@@ -19,11 +21,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 public class RouteService {
 
-    private final static Logger LOGGER = Logger.getLogger(RouteService.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RouteService.class);
 
     private GoogleMap map;
 
@@ -126,7 +127,7 @@ public class RouteService {
                     path = getPathFromAnAlgorithmWithNOVisualisation(start, end, toggle);
                 }
                 if (path == null) {
-                    LOGGER.warning("In displayRoute : PATH NOT FOUND");
+                    LOGGER.error("In displayRoute : PATH NOT FOUND");
                     MapApp.showInfoAlert("Routing Error : ", "No path found");
                     return false;
                 }
@@ -224,7 +225,7 @@ public class RouteService {
                         retVal.add(new LatLong(point.getX(), point.getY()));
                     }
                 } else {
-                    LOGGER.warning("ERROR in constructMapPath : chosenSegment was null");
+                    LOGGER.error("ERROR in constructMapPath : chosenSegment was null");
                 }
 
             }

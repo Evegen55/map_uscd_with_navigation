@@ -10,12 +10,13 @@ import application.entities.CLabel;
 import application.entities.DataSet;
 import com.lynden.gmapsfx.javascript.object.Marker;
 import geography.GeographicPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Logger;
 
 public class SelectManager {
 
-    private final static Logger LOGGER = Logger.getLogger(SelectManager.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(SelectManager.class);
 
     private CLabel<GeographicPoint> pointLabel;
     private CLabel<GeographicPoint> startLabel;
@@ -52,7 +53,7 @@ public class SelectManager {
         if (markerManager != null) {
             markerManager.displayDataSet();
         } else {
-            LOGGER.warning("Error : Marker Manager is null.");
+            LOGGER.error("Error : Marker Manager is null.");
         }
     }
 

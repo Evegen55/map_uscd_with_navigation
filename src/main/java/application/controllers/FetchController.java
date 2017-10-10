@@ -97,9 +97,9 @@ public class FetchController {
 
     private void readFileWithListOfMaps(final String fileName) throws IOException {
         Files.lines(Paths.get(fileName)).forEach(line -> {
-            LOGGER.debug(line);
+            ////LOGGER.debug(line);
             final String path = GeneralService.getDataSetDirectory() + line;
-            LOGGER.debug(path);
+            ////LOGGER.debug(path);
             dataChoices.getItems().add(new DataSet(path));
         });
     }
