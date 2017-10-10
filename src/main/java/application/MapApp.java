@@ -58,7 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * cmd parameter "enable_vis" enables visualisation button
+ * cmd parameter "enable_vis" enables visualisation button. By default there is NO visualisation
  */
 public class MapApp extends Application implements MapComponentInitializedListener {
 
@@ -170,7 +170,7 @@ public class MapApp extends Application implements MapComponentInitializedListen
             LOGGER.info("in map ready : " + this.getClass());
             LOGGER.info("initialize controllers");
             new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
-                    startLabel, endLabel, pointLabel, manager, markerManager);
+                    startLabel, endLabel, pointLabel, manager, markerManager, visualisation_enabled);
             new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton, primaryStage);
         });
 
