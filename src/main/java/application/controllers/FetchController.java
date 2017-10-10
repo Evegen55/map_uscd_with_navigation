@@ -17,6 +17,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.PathsToTheData;
 
 import java.io.File;
@@ -24,11 +26,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.logging.Logger;
+
 
 public class FetchController {
 
-    private final static Logger LOGGER = Logger.getLogger(FetchController.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(FetchController.class);
 
     private static final int ROW_COUNT = 5;
     private GeneralService generalService;
@@ -70,7 +72,7 @@ public class FetchController {
         try {
             readFileWithListOfMaps(PathsToTheData.PERSIST_PATH_FOR_TESTS);
         } catch (IOException e) {
-            LOGGER.warning("No existing map files found.");
+            LOGGER.error("No existing map files found.");
             pickListFileInsideFolderWithMaps(primaryStage);
         }
     }
@@ -85,7 +87,7 @@ public class FetchController {
             try {
                 readFileWithListOfMaps(openDialogFilePath);
             } catch (IOException e1) {
-                LOGGER.warning("Second exception");
+                LOGGER.error("Second exception");
                 e1.printStackTrace();
             }
         } else {
@@ -95,9 +97,9 @@ public class FetchController {
 
     private void readFileWithListOfMaps(final String fileName) throws IOException {
         Files.lines(Paths.get(fileName)).forEach(line -> {
-            LOGGER.fine(line);
+            LOGGER.debug(line);
             final String path = GeneralService.getDataSetDirectory() + line;
-            LOGGER.fine(path);
+            LOGGER.debug(path);
             dataChoices.getItems().add(new DataSet(path));
         });
     }
