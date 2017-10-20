@@ -4,13 +4,12 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-<SplitPane dividerPositions="0.75" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-           orientation="VERTICAL" prefHeight="800.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
-           xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane dividerPositions="0.75" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="800.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <items>
-        <AnchorPane fx:id="myPaneWithMapsAndOtherFeatures"
-                    minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"/>
-        <AnchorPane fx:id="myPaneWithControls"
-                    minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0"/>
+        <AnchorPane fx:id="myPaneWithMapsAndOtherFeatures" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+        <AnchorPane fx:id="myPaneWithControls" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+         <children>
+            <Slider layoutX="20.0" layoutY="30.0" orientation="VERTICAL" />
+         </children></AnchorPane>
     </items>
 </SplitPane>
