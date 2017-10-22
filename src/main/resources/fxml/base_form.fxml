@@ -9,7 +9,7 @@
         <AnchorPane fx:id="myPaneWithMapsAndOtherFeatures" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
         <AnchorPane fx:id="myPaneWithControls" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
          <children>
-            <Slider layoutX="20.0" layoutY="30.0" orientation="VERTICAL" />
+            <Slider layoutX="20.0" layoutY="30.0" orientation="VERTICAL" minWidth="100"/>
          </children></AnchorPane>
     </items>
 </SplitPane>
