@@ -24,7 +24,7 @@ public class CarControl extends Application {
     public void start(Stage primaryStage) throws IOException {
         primaryStage.setTitle("Car control panel");
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(CarControl.class.getClassLoader().getResource("fxml/base_form.fxml"));
+        loader.setLocation(getClass().getResource("/fxml/base_form.fxml"));
         // set google maps controller
         final GmapfxController gmapfxController = new GmapfxController();
         loader.setController(gmapfxController);
