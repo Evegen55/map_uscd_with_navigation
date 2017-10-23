@@ -3,6 +3,7 @@ package application_with_features;/**
  */
 
 import application_with_features.controllers.GmapfxController;
+import application_with_features.controllers.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,14 +26,17 @@ public class CarControl extends Application {
         primaryStage.setTitle("Car control panel");
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/fxml/base_form.fxml"));
-        // set google maps controller
-        final GmapfxController gmapfxController = new GmapfxController();
-        loader.setController(gmapfxController);
+        // set the main controller as root controller
+        final MainController mainController = new MainController();
+        loader.setController(mainController);
         final Parent parent = loader.load();
         final Scene scene = new Scene(parent);
         primaryStage.setScene(scene);
         primaryStage.show();
-        gmapfxController.createSimpleMap();
+
+        //do the stuff
+        mainController.showMap();
+        mainController.showControlsInit();
     }
 
 }
