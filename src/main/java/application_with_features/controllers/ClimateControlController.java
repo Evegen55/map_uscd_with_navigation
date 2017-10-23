@@ -1,5 +1,6 @@
 package application_with_features.controllers;
 
+import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 
 /**
@@ -7,7 +8,14 @@ import javafx.scene.layout.AnchorPane;
  */
 public class ClimateControlController {
 
+    private Slider slider;
+
+    public ClimateControlController(Slider slider) {
+        this.slider = slider;
+    }
+
     public void createInitForControls(final AnchorPane myPaneWithControls) {
+        System.out.println(slider.getOrientation());
 
     }
 }
