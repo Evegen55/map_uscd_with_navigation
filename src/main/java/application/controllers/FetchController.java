@@ -1,6 +1,6 @@
 package application.controllers;
 
-import application.DataSet;
+import application.entities.DataSet;
 import application.services.GeneralService;
 import application.services.RouteService;
 import javafx.scene.Node;
@@ -12,17 +12,25 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.PathsToTheData;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
+import java.util.Arrays;
+
 
 public class FetchController {
 
-    private final static Logger LOGGER = Logger.getLogger(FetchController.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(FetchController.class);
 
     private static final int ROW_COUNT = 5;
     private GeneralService generalService;
@@ -39,33 +47,74 @@ public class FetchController {
     private static final double LIMIT_TOTAL_ERROR = 0.5;
     private static final double LIMIT_WARNING_ERROR = 0.02;
 
-    public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
-                           Button fetchButton, ComboBox<DataSet> dataSetComboBox, Button displayButton) {
+    public FetchController(final GeneralService generalService, final RouteService routeService, final TextField writeFile,
+                           final Button fetchButton, ComboBox<DataSet> dataSetComboBox, final Button displayButton, Stage primaryStage) {
         this.generalService = generalService;
         this.routeService = routeService;
         this.fetchButton = fetchButton;
         this.displayButton = displayButton;
         this.writeFile = writeFile;
-        dataChoices = dataSetComboBox;
+        this.dataChoices = dataSetComboBox;
         setupComboCells();
         setupFetchButton();
         setupDisplayButton();
-        loadDataSets();
+        loadDataSets(primaryStage);
 
     }
 
-    private void loadDataSets() {
+    // TODO: 10/6/2017 pick a folder and try to form list of maps from list of on-premises files
+    /*
+    first, it finds a data folder with .map and . list files
+    if .list file wasn't been found - then the file choosing window will be pop-up
+    if file is null - then the directory choosing window will be pop-up
+     */
+    private void loadDataSets(final Stage primaryStage) {
         try {
-            Files.lines(Paths.get(PathsToTheData.PERSIST_PATH)).forEach(line -> {
-                LOGGER.fine(line);
-                final String path = GeneralService.getDataSetDirectory() + line;
-                LOGGER.fine(path);
-                dataChoices.getItems().add(new DataSet(path));
-            });
+            readFileWithListOfMaps(PathsToTheData.PERSIST_PATH_FOR_TESTS);
         } catch (IOException e) {
-            LOGGER.warning("No existing map files found.");
-            // TODO: 10/5/2017 use file chooser in this case
-            e.printStackTrace();
+            LOGGER.error("No existing map files found.");
+            pickListFileInsideFolderWithMaps(primaryStage);
+        }
+    }
+
+    private void pickListFileInsideFolderWithMaps(final Stage primaryStage) {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Find a file with extension .list");
+        final File openDialogFile = fileChooser.showOpenDialog(primaryStage);
+        if (openDialogFile != null) {
+            final String openDialogFilePath = openDialogFile.getPath();
+            LOGGER.info(openDialogFilePath);
+            try {
+                readFileWithListOfMaps(openDialogFilePath);
+            } catch (IOException e1) {
+                LOGGER.error("Second exception");
+                e1.printStackTrace();
+            }
+        } else {
+            readMapsFromFolder(primaryStage);
+        }
+    }
+
+    private void readFileWithListOfMaps(final String fileName) throws IOException {
+        Files.lines(Paths.get(fileName)).forEach(line -> {
+            LOGGER.debug(line);
+            final String path = GeneralService.getDataSetDirectory() + line;
+            LOGGER.debug(path);
+            dataChoices.getItems().add(new DataSet(path));
+        });
+    }
+
+    private void readMapsFromFolder(final Stage primaryStage) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Find a folder with files with extension .map");
+        File selectedDirectory = directoryChooser.showDialog(primaryStage);
+        final File[] listFiles = selectedDirectory.listFiles();
+        if (listFiles != null) {
+            LOGGER.info("Found " + listFiles.length + " files");
+            Arrays.stream(listFiles).forEach(file -> {
+                LOGGER.info("Trying to load from the file: " + file.getPath());
+                dataChoices.getItems().add(new DataSet(file.getPath()));
+            });
         }
     }
 
@@ -87,7 +136,7 @@ public class FetchController {
                         if (empty || item == null) {
                             super.setText("None.");
                         } else {
-                            super.setText(item.getFilePath().substring(GeneralService.getDataSetDirectory().length()));
+                            super.setText(FilenameUtils.getName(item.getFilePath()));
 
                         }
                     }
@@ -98,10 +147,10 @@ public class FetchController {
 
         dataChoices.setButtonCell(new ListCell<DataSet>() {
             @Override
-            protected void updateItem(DataSet t, boolean bln) {
-                super.updateItem(t, bln);
-                if (t != null) {
-                    setText(t.getFilePath().substring(GeneralService.getDataSetDirectory().length()));
+            protected void updateItem(DataSet item, boolean bln) {
+                super.updateItem(item, bln);
+                if (item != null) {
+                    setText(FilenameUtils.getName(item.getFilePath()));
                 } else {
                     setText("Choose...");
                 }

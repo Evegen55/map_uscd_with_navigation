@@ -9,6 +9,8 @@ package roadgraph;
 
 
 import geography.GeographicPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,7 +24,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 /**
  * @author UCSD MOOC development team and
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class MapGraph {
 
-    private final static Logger LOGGER = Logger.getLogger(MapGraph.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapGraph.class);
 
     //member variables here in WEEK 2
     private int numVertices;
@@ -101,7 +102,7 @@ public class MapGraph {
     public boolean addVertex(final GeographicPoint location) {
         //Implemented this method in WEEK 2
         //add a distance for week 3 - set a distance to infinity
-        LOGGER.fine("adding" + "\t" + location.toString());
+        LOGGER.debug("adding" + "\t" + location.toString());
         if (!listNodes.containsKey(location)) {
             MapNode mapNode = new MapNode(location, "");
             listNodes.put(location, mapNode);
@@ -200,7 +201,7 @@ public class MapGraph {
 
             //add an OUTCOMING edge from -> to
             listNodes.get(from).getListEdges().add(addedMapEdge);
-            LOGGER.fine("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
+            LOGGER.debug("an OUTCOMING edge from -> to added: " + "\t" + addedMapEdge.toString());
         }
     }
 
@@ -385,11 +386,11 @@ public class MapGraph {
         final MapNode endNode = listNodes.get(goal);
 
         if (startNode == null) {
-            LOGGER.warning("Start node " + start + " does not exist");
+            LOGGER.error("Start node " + start + " does not exist");
             return null;
         }
         if (endNode == null) {
-            LOGGER.warning("End node " + goal + " does not exist");
+            LOGGER.error("End node " + goal + " does not exist");
             return null;
         }
 
@@ -417,7 +418,7 @@ public class MapGraph {
             }
         }
         if (!next.equals(endNode)) {
-            LOGGER.warning("No path found from " + start + " to " + goal);
+            LOGGER.error("No path found from " + start + " to " + goal);
             return null;
         }
         // Reconstruct the parent path
@@ -508,7 +509,7 @@ public class MapGraph {
 
             //it just because we havent got the full road map in some cases
             if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
-                LOGGER.warning("No path found from " + start + " to " + goal);
+                LOGGER.warn("No path found from " + start + " to " + goal);
                 return null;
             }
             lfs = reconstructPath(parentMap, startNode, goalNode);
@@ -588,7 +589,7 @@ public class MapGraph {
                             double edgeLength = getLengthEdgeBeetwen(current, neighbour);
                             if ((current.getDistance() + edgeLength < neighbour.getDistance())
                                     && getReducedCost(current.getNodeLocation(), goal) <= redCost) {
-                                LOGGER.fine("" + getReducedCost(current.getNodeLocation(), goal));
+                                LOGGER.debug("" + getReducedCost(current.getNodeLocation(), goal));
                                 //update neighbour's distance
                                 neighbour.setDistance(current.getDistance() + edgeLength);
                                 parentMap.put(neighbour, current);
@@ -601,7 +602,7 @@ public class MapGraph {
             }
             //it just because we havent got the full road map in some cases
             if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
-                LOGGER.warning("No path found from " + start + " to " + goal);
+                LOGGER.warn("No path found from " + start + " to " + goal);
                 return null;
             }
             lfs = reconstructPath(parentMap, startNode, goalNode);
@@ -678,7 +679,7 @@ public class MapGraph {
                         if (!visited.contains(next)) {
                             //if path through current to n is faster ->
                             double timeToNextNode = getTimeBetweenNodes(current, next);
-                            LOGGER.fine("timeToNextNode" + "\t" + timeToNextNode);
+                            LOGGER.debug("timeToNextNode" + "\t" + timeToNextNode);
                             if (current.getTime() + timeToNextNode < next.getTime()) {
                                 //update next's speed Limit
                                 next.setTime(current.getTime() + timeToNextNode);
@@ -693,7 +694,7 @@ public class MapGraph {
             }
             //it just because we havent got the full road map in some cases
             if (!mapNodeCheckContainer.getMapNode().equals(goalNode)) {
-                LOGGER.warning("No path found from " + start + " to " + goal);
+                LOGGER.debug("No path found from " + start + " to " + goal);
                 return null;
             }
 

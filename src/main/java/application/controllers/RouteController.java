@@ -1,21 +1,23 @@
 package application.controllers;
 
-import application.CLabel;
 import application.MapApp;
-import application.MarkerManager;
-import application.SelectManager;
+import application.business.MarkerManager;
+import application.business.SelectManager;
+import application.entities.CLabel;
 import application.services.RouteService;
+import geography.GeographicPoint;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.AlgorithmsTypes;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class RouteController {
 
-    private final static Logger LOGGER = Logger.getLogger(RouteController.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RouteController.class);
 
     // Strings for slider labels
     public static final int DIJ = 1;
@@ -42,12 +44,14 @@ public class RouteController {
     private SelectManager selectManager;
     private MarkerManager markerManager;
 
+    private static boolean visualisation_enabled = false;
 
     public RouteController(final RouteService routeService, final Button displayButton, final Button hideButton,
                            final Button resetButton, final Button startButton, final Button destinationButton,
                            final ToggleGroup group, List<RadioButton> searchOptions, final Button visualizationButton,
-                           final CLabel<geography.GeographicPoint> startLabel, final CLabel<geography.GeographicPoint> endLabel,
-                           final CLabel<geography.GeographicPoint> pointLabel, final SelectManager manager, MarkerManager markerManager) {
+                           final CLabel<GeographicPoint> startLabel, final CLabel<GeographicPoint> endLabel,
+                           final CLabel<GeographicPoint> pointLabel, final SelectManager manager, MarkerManager markerManager,
+                           final boolean vis_enabled) {
         // save parameters
         this.routeService = routeService;
         this.displayButton = displayButton;
@@ -64,30 +68,31 @@ public class RouteController {
         this.pointLabel = pointLabel;
         this.selectManager = manager;
         this.markerManager = markerManager;
+        visualisation_enabled = vis_enabled;
 
         setupDisplayButtons();
         setupRouteButtons();
         setupVisualizationButton();
         setupToggle();
-        //routeService.displayRoute("data/sampleroute.map");
     }
 
 
     private void setupDisplayButtons() {
         displayButton.setOnAction(e -> {
             if (startLabel.getItem() != null && endLabel.getItem() != null) {
-                routeService.displayRoute(startLabel.getItem(), endLabel.getItem(), selectedToggle);
+                routeService.displayRoute(startLabel.getItem(), endLabel.getItem(), selectedToggle, visualisation_enabled);
             } else {
                 MapApp.showErrorAlert("Route Display Error", "Make sure to choose points for both start and destination.");
             }
         });
         hideButton.setOnAction(e -> routeService.hideRoute());
-
         resetButton.setOnAction(e -> routeService.reset());
     }
 
     private void setupVisualizationButton() {
-        visualizationButton.setOnAction(e -> markerManager.startVisualization());
+        if (visualisation_enabled) {
+            visualizationButton.setOnAction(e -> markerManager.startVisualization());
+        }
     }
 
     private void setupRouteButtons() {
@@ -107,7 +112,7 @@ public class RouteController {
             } else if (group.getSelectedToggle().getUserData().equals(AlgorithmsTypes.D_TIME)) {
                 selectedToggle = D_time;
             } else {
-                LOGGER.warning("Invalid radio button selection");
+                LOGGER.error("Invalid radio button selection");
             }
         });
     }

@@ -7,16 +7,21 @@
  */
 package application;
 
+import application.business.MarkerManager;
+import application.business.SelectManager;
 import application.controllers.FetchController;
 import application.controllers.RouteController;
+import application.entities.CLabel;
+import application.entities.DataSet;
 import application.services.GeneralService;
 import application.services.RouteService;
-import gmapsfx.GoogleMapView;
-import gmapsfx.MapComponentInitializedListener;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.MapOptions;
-import gmapsfx.javascript.object.MapTypeIdEnum;
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.MapComponentInitializedListener;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.MapOptions;
+import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
+import geography.GeographicPoint;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -43,28 +48,35 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.AlgorithmsTypes;
 import util.PathsToTheData;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
+/**
+ * cmd parameter "enable_vis" enables visualisation button. By default there is NO visualisation
+ */
+public class MapApp extends Application implements MapComponentInitializedListener {
 
-public class MapApp extends Application
-        implements MapComponentInitializedListener {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MapApp.class);
 
-    private final static Logger LOGGER = Logger.getLogger(MapApp.class.getName());
-
-    protected GoogleMapView mapComponent;
+    private GoogleMapView mapComponent;
     protected GoogleMap map;
-    protected BorderPane bp;
-    protected Stage primaryStage;
+    private BorderPane bp;
+    private Stage primaryStage;
 
     // CONSTANTS
     private static final double MARGIN_VAL = 10;
     private static final double FETCH_COMPONENT_WIDTH = 160.0;
+
+    private static String paramToStartWithCustomFile = "enable_vis";
+    private static final String MAP_RESOURCE_PATH = "/html/index.html";
+    private static boolean visualisation_enabled = false;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -81,8 +93,14 @@ public class MapApp extends Application
         bp = new BorderPane();
 
         // set up map
+        if (isParamToVisualise()) {
+            LOGGER.warn("Application will use custom file" + "\t" + MAP_RESOURCE_PATH);
+            // TODO: 10/9/2017 why the function visualizeSearch(mapParam, markersParam) is not founded??
+            mapComponent = new GoogleMapView(MAP_RESOURCE_PATH);
+            visualisation_enabled = true;
+        }
         mapComponent = new GoogleMapView();
-        mapComponent.addMapInitializedListener(this);
+        mapComponent.addMapInializedListener(this);
 
         // initialize tabs for data fetching and route controls
         final Tab routeTab = new Tab("Routing");
@@ -108,7 +126,7 @@ public class MapApp extends Application
         final Image sImage = new Image(MarkerManager.startURL);
         final Image dImage = new Image(MarkerManager.destinationURL);
         LOGGER.info("create empty start and end points");
-        final CLabel<geography.GeographicPoint> startLabel = new CLabel<>("Empty.", new ImageView(sImage), null);
+        final CLabel<GeographicPoint> startLabel = new CLabel<>("Empty.", new ImageView(sImage), null);
         final CLabel<geography.GeographicPoint> endLabel = new CLabel<>("Empty.", new ImageView(dImage), null);
         //TODO -- hot fix
         startLabel.setMinWidth(180);
@@ -130,6 +148,7 @@ public class MapApp extends Application
         final MarkerManager markerManager = new MarkerManager();
         markerManager.setSelectManager(manager);
         manager.setMarkerManager(markerManager);
+        // TODO: 10/9/2017 move it into setupRouteTab method
         markerManager.setVisButton(visualizationButton);
 
         LOGGER.info(" create components for route tab");
@@ -151,8 +170,8 @@ public class MapApp extends Application
             LOGGER.info("in map ready : " + this.getClass());
             LOGGER.info("initialize controllers");
             new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
-                    startLabel, endLabel, pointLabel, manager, markerManager);
-            new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton);
+                    startLabel, endLabel, pointLabel, manager, markerManager, visualisation_enabled);
+            new FetchController(gs, rs, tf, fetchButton, dataSetComboBox, displayButton, primaryStage);
         });
 
         LOGGER.info("Add components to border pane");
@@ -166,10 +185,24 @@ public class MapApp extends Application
         primaryStage.show();
     }
 
+    private boolean isParamToVisualise() {
+        LOGGER.info("Retrieving list of params ... ");
+        final List<String> stringList = this.getParameters().getRaw();
+        if (!stringList.isEmpty()) {
+            LOGGER.info("List of params is not empty");
+            final String paramRunWithVis = stringList.get(0);
+            if (paramRunWithVis != null && paramRunWithVis.equals(paramToStartWithCustomFile)) {
+                LOGGER.info("Param to start visualisation: " + paramRunWithVis);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public void mapInitialized() {
-        LOGGER.info("Map initializing");
+        LOGGER.info("Map initializing...");
         final LatLong center = new LatLong(32.8810, -117.2380);
         // set map options
         final MapOptions options = new MapOptions();
@@ -187,7 +220,8 @@ public class MapApp extends Application
                 .zoomControl(true);
         // create map;
         map = mapComponent.createMap(options);
-        setupJSAlerts(mapComponent.getWebView());
+        setupJSAlerts(mapComponent.getWebview());
+        LOGGER.info("Map initialized successfully");
     }
 
 
@@ -239,15 +273,15 @@ public class MapApp extends Application
      * @param showButton
      * @param hideButton
      * @param resetButton
-     * @param vButton
+     * @param visButton
      * @param startButton
      * @param destButton
      * @param searchOptions
      */
-    private void setupRouteTab(final Tab routeTab, final VBox fetchBox, final Label startLabel, final Label endLabel, final Label pointLabel,
-                               final Button showButton, final Button hideButton, final Button resetButton, final Button vButton,
-                               final Button startButton,
-                               final Button destButton, final List<RadioButton> searchOptions) {
+    private static void setupRouteTab(final Tab routeTab, final VBox fetchBox, final Label startLabel, final Label endLabel, final Label pointLabel,
+                                      final Button showButton, final Button hideButton, final Button resetButton, final Button visButton,
+                                      final Button startButton,
+                                      final Button destButton, final List<RadioButton> searchOptions) {
 
         //set up tab layout
         final HBox h = new HBox();
@@ -291,10 +325,12 @@ public class MapApp extends Application
         for (RadioButton rb : searchOptions) {
             v.getChildren().add(rb);
         }
-        v.getChildren().add(vButton);
+        if (visualisation_enabled) {
+            v.getChildren().add(visButton);
+        }
         VBox.setMargin(showHideBox, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
-        VBox.setMargin(vButton, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
-        vButton.setDisable(true);
+        VBox.setMargin(visButton, new Insets(MARGIN_VAL, MARGIN_VAL, MARGIN_VAL, MARGIN_VAL));
+        visButton.setDisable(true);
         v.getChildren().add(markerBox);
 //        v.getChildren().add(resetButton);
         routeTab.setContent(h);
@@ -316,7 +352,7 @@ public class MapApp extends Application
         });
     }
 
-    private LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
+    private static LinkedList<RadioButton> setupToggle(final ToggleGroup group) {
 
         // Use Dijkstra as default
         final RadioButton rbD = new RadioButton(AlgorithmsTypes.DIJKSTRA.toString());

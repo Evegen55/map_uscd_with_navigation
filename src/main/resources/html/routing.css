@@ -9,7 +9,7 @@ html, body {
   -fx-font-family: Helvetica, Trebuchet , Verdana, Sans-Serif, Times New Roman;
 }
 
-#map {
+#map-canvas {
   height: 100%;
 }
 

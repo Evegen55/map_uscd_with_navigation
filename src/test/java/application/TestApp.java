@@ -5,12 +5,12 @@
  */
 package application;
 
-import gmapsfx.GoogleMapView;
-import gmapsfx.MapComponentInitializedListener;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.MapOptions;
-import gmapsfx.javascript.object.MapTypeIdEnum;
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.MapComponentInitializedListener;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.MapOptions;
+import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -25,7 +25,7 @@ public class TestApp extends Application
     @Override
     public void start(Stage primaryStage) throws Exception {
         mapComponent = new GoogleMapView();
-        mapComponent.addMapInitializedListener(this);
+        mapComponent.addMapInializedListener(this);
 
         BorderPane bp = new BorderPane();
         Scene scene = new Scene(bp);

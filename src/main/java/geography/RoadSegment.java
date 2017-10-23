@@ -1,9 +1,11 @@
 package geography;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * A segment of the road that includes the intersection end points
@@ -14,7 +16,7 @@ import java.util.logging.Logger;
 
 public class RoadSegment {
 
-    private final static Logger LOGGER = Logger.getLogger(RoadSegment.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RoadSegment.class);
 
     private GeographicPoint point1;
     private GeographicPoint point2;
@@ -120,7 +122,7 @@ public class RoadSegment {
         if (point.equals(point2)) {
             return point1;
         }
-        LOGGER.warning("ERROR!! : in RoadSegment::getOtherPoint Neither point matched");
+        LOGGER.error("ERROR!! : in RoadSegment::getOtherPoint Neither point matched");
         return null;
     }
 

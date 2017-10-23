@@ -1,16 +1,19 @@
 package application.services;
 
 import application.MapApp;
-import application.MarkerManager;
-import application.RouteVisualization;
+import application.business.MarkerManager;
+import application.business.RouteVisualization;
 import application.controllers.RouteController;
-import gmapsfx.GoogleMapView;
-import gmapsfx.javascript.object.GoogleMap;
-import gmapsfx.javascript.object.LatLong;
-import gmapsfx.javascript.object.LatLongBounds;
-import gmapsfx.javascript.object.MVCArray;
-import gmapsfx.shapes.Polyline;
-import gmapsfx.shapes.PolylineOptions;
+import com.lynden.gmapsfx.GoogleMapView;
+import com.lynden.gmapsfx.javascript.object.GoogleMap;
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.LatLongBounds;
+import com.lynden.gmapsfx.javascript.object.MVCArray;
+import com.lynden.gmapsfx.shapes.Polyline;
+import com.lynden.gmapsfx.shapes.PolylineOptions;
+import geography.GeographicPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import roadgraph.MapGraph;
 
 import java.util.ArrayList;
@@ -18,11 +21,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 public class RouteService {
 
-    private final static Logger LOGGER = Logger.getLogger(RouteService.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(RouteService.class);
 
     private GoogleMap map;
 
@@ -58,7 +60,8 @@ public class RouteService {
         LatLongBounds bounds = new LatLongBounds();
         for (LatLong point : route) {
             path.push(point);
-            bounds = bounds.extend(point);
+//            bounds = bounds.extend(point);
+            bounds.extend(point);
         }
 
         //use PolylineOptions to manage color instead empty constructor
@@ -100,9 +103,11 @@ public class RouteService {
      * @param start
      * @param end
      * @param toggle
+     * @param isVisualisationEnabled
      * @return
      */
-    public boolean displayRoute(final geography.GeographicPoint start, final geography.GeographicPoint end, int toggle) {
+    public boolean displayRoute(final GeographicPoint start, final GeographicPoint end,
+                                final int toggle, boolean isVisualisationEnabled) {
         if (routeLine == null) {
             if (markerManager.getVisualization() != null) {
                 markerManager.clearVisualization();
@@ -110,28 +115,23 @@ public class RouteService {
             //in case of allowed algorithms
             if (toggle == RouteController.DIJ || toggle == RouteController.A_STAR ||
                     toggle == RouteController.BFS || toggle == RouteController.D_time) {
-                LOGGER.info("Start find path");
-                markerManager.initVisualization();
-                final Consumer<geography.GeographicPoint> nodeAccepter = markerManager.getVisualization()::acceptPoint;
-
+                LOGGER.info("Start finding path ... ");
                 List<geography.GeographicPoint> path;
-                final MapGraph mapGraph = markerManager.getDataSet().getGraph();
-                if (toggle == RouteController.BFS) {
-                    path = mapGraph.bfs(start, end, nodeAccepter);
-                } else if (toggle == RouteController.DIJ) {
-                    path = mapGraph.dijkstra(start, end, nodeAccepter);
-                } else if (toggle == RouteController.D_time) {
-                    path = mapGraph.dijkstraByTime(start, end, nodeAccepter);
+                if (isVisualisationEnabled) {
+                    LOGGER.info("Getting path with hook for visualisation");
+                    markerManager.initVisualization();
+                    final Consumer<geography.GeographicPoint> nodeAccepter = markerManager.getVisualization()::acceptPoint;
+                    path = getPathFromAnAlgorithmWithVisualisation(start, end, toggle, nodeAccepter);
                 } else {
-                    path = mapGraph.aStarSearch(start, end, nodeAccepter);
+                    LOGGER.info("Getting path with NO hook for visualisation");
+                    path = getPathFromAnAlgorithmWithNOVisualisation(start, end, toggle);
                 }
-
                 if (path == null) {
-                    LOGGER.warning("In displayRoute : PATH NOT FOUND");
+                    LOGGER.error("In displayRoute : PATH NOT FOUND");
                     MapApp.showInfoAlert("Routing Error : ", "No path found");
                     return false;
                 }
-                LOGGER.info("Path was found successfully");
+                LOGGER.info("Path was found successfully!");
                 // TODO -- debug road segments
                 List<LatLong> mapPath = constructMapPath(path);
                 //List<LatLong> mapPath = new ArrayList<LatLong>();
@@ -144,6 +144,41 @@ public class RouteService {
             return false;
         }
         return false;
+    }
+
+    private List<GeographicPoint> getPathFromAnAlgorithmWithNOVisualisation(final GeographicPoint start,
+                                                                            final GeographicPoint end,
+                                                                            final int toggle) {
+        List<GeographicPoint> path;
+        final MapGraph mapGraph = markerManager.getDataSet().getGraph();
+        if (toggle == RouteController.BFS) {
+            path = mapGraph.bfs(start, end);
+        } else if (toggle == RouteController.DIJ) {
+            path = mapGraph.dijkstra(start, end);
+        } else if (toggle == RouteController.D_time) {
+            path = mapGraph.dijkstraByTime(start, end);
+        } else {
+            path = mapGraph.aStarSearch(start, end);
+        }
+        return path;
+    }
+
+    private List<GeographicPoint> getPathFromAnAlgorithmWithVisualisation(final GeographicPoint start,
+                                                                          final GeographicPoint end,
+                                                                          final int toggle,
+                                                                          final Consumer<GeographicPoint> nodeAccepter) {
+        List<GeographicPoint> path;
+        final MapGraph mapGraph = markerManager.getDataSet().getGraph();
+        if (toggle == RouteController.BFS) {
+            path = mapGraph.bfs(start, end, nodeAccepter);
+        } else if (toggle == RouteController.DIJ) {
+            path = mapGraph.dijkstra(start, end, nodeAccepter);
+        } else if (toggle == RouteController.D_time) {
+            path = mapGraph.dijkstraByTime(start, end, nodeAccepter);
+        } else {
+            path = mapGraph.aStarSearch(start, end, nodeAccepter);
+        }
+        return path;
     }
 
 
@@ -190,7 +225,7 @@ public class RouteService {
                         retVal.add(new LatLong(point.getX(), point.getY()));
                     }
                 } else {
-                    LOGGER.warning("ERROR in constructMapPath : chosenSegment was null");
+                    LOGGER.error("ERROR in constructMapPath : chosenSegment was null");
                 }
 
             }
